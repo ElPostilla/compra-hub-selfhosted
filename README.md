@@ -1,5 +1,7 @@
 # Hub de casa
 
+**Español** · [English](README.en.md)
+
 Un conjunto de aplicaciones web para organizar el día a día de casa —
 lista de la compra, tareas, calendario, gastos y menú semanal — pensadas
 para usarse solo o en grupo (pareja, familia, compañeros de piso...). Todo
