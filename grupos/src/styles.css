@@ -1,0 +1,163 @@
+/* Social (amigos y grupos). La base (papel, tinta, controles, menu)
+   vive en hub-theme.css, comun a todo el hub. Este fichero es IDENTICO
+   en perfil y grupos salvo el color de separador (--tab): ambas apps
+   comparten secciones, filas de persona, botones y avisos. Global a
+   proposito: lo usan las tarjetas hijas (amigos, grupos, cuenta). */
+@import './hub-theme.css';
+
+:root { --tab: var(--tab-social); }
+
+/* ------------------------------------------------------------ secciones */
+
+/* Cada seccion, un apartado de la hoja: titulo a mano y una linea, sin
+   tarjeta. */
+section.card { padding: 1.25rem 0 0.5rem; border-top: 1.5px solid var(--rule); }
+section.card:first-of-type { border-top: none; padding-top: 0.5rem; }
+section.card h2 { margin: 0 0 0.85rem; font-size: 1.5rem; font-weight: 750; }
+.section-label,
+.activity-label {
+  margin: 1rem 0 0.2rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------ cuenta */
+
+.profile-avatar-row { margin-bottom: 0.75rem; }
+.profile-row {
+  display: flex;
+  flex-direction: column;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.profile-label { color: var(--ink-soft); font-size: 0.85rem; font-weight: 600; }
+.profile-value { font-size: 1.05rem; overflow-wrap: anywhere; }
+
+/* ------------------------------------------------------------ botones */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: var(--tap);
+  padding: 0 1rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.98rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+.btn:hover { border-color: var(--ink-soft); }
+.btn-primary { border-color: var(--pen); background: var(--pen); color: var(--on-pen); }
+.btn-primary:hover { border-color: var(--pen-strong); background: var(--pen-strong); }
+.btn-danger { color: var(--red); }
+.btn-danger:hover { border-color: var(--red); background: var(--red-soft); }
+.btn-sm { min-height: 38px; padding: 0 0.75rem; font-size: 0.9rem; }
+.btn-block { width: 100%; margin-top: 1rem; }
+
+form.inline-form { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; }
+form.inline-form input,
+form.inline-form select { flex: 1 1 auto; min-width: 0; }
+
+/* ------------------------------------------------------------ personas */
+
+.person-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 58px;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.person-identity { display: flex; align-items: center; gap: 0.65rem; min-width: 0; }
+.person-name { font-size: 1rem; font-weight: 650; overflow-wrap: anywhere; }
+.person-sub { color: var(--ink-soft); font-size: 0.85rem; }
+.person-actions { flex: 0 0 auto; display: flex; gap: 0.4rem; }
+.empty-hint { padding: 0.5rem 0; color: var(--ink-faint); font-size: 0.95rem; }
+
+/* ------------------------------------------------------------ grupos */
+
+.group-item { padding: 0.35rem 0; border-bottom: 1px solid var(--rule); }
+.group-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 58px;
+}
+.group-name { font-variation-settings: 'CASL' 1; font-size: 1.2rem; font-weight: 700; }
+.group-meta { color: var(--ink-soft); font-size: 0.85rem; }
+.group-body { display: none; flex-direction: column; gap: 0.6rem; padding: 0.25rem 0 1rem 0.9rem; border-left: 3px solid var(--tab); }
+.group-body.open { display: flex; }
+.group-body .btn-block { margin-top: 0; }
+.group-members { display: flex; flex-direction: column; }
+
+.activity-feed { display: flex; flex-direction: column; max-height: 15rem; overflow-y: auto; }
+.activity-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--rule);
+  font-size: 0.92rem;
+}
+.activity-actor { flex: 0 0 auto; font-weight: 700; }
+.activity-message { flex: 1 1 auto; min-width: 0; color: var(--ink-soft); }
+.activity-time { flex: 0 0 auto; color: var(--ink-faint); font-size: 0.82rem; }
+
+/* ------------------------------------------------------------ invitar */
+
+/* Enlace de invitacion de un grupo (groups-card) y tarjeta de quien lo
+   recibe (invite-card). */
+.invite-box { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.25rem; }
+.invite-box .section-label { margin-top: 0.25rem; }
+.invite-help { margin: 0; color: var(--ink-soft); font-size: 0.92rem; }
+input.invite-link { width: 100%; font-size: 0.88rem; color: var(--ink-soft); }
+.invite-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.invite-meta { color: var(--ink-faint); font-size: 0.85rem; }
+.link-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--pen);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+section.card.invite-card {
+  padding: 1rem 1.1rem;
+  border: 1.5px solid var(--tab);
+  border-left-width: 6px;
+  border-radius: var(--r-m);
+  background: var(--paper);
+}
+.invite-card h2 { margin-bottom: 0.25rem; }
+.invite-who { display: flex; align-items: flex-start; gap: 0.8rem; margin-bottom: 0.9rem; }
+.invite-card .person-sub { margin: 0; }
+
+/* ------------------------------------------------------------ avisos */
+
+.status {
+  display: none;
+  padding: 0.7rem 0.9rem;
+  border-left: 4px solid var(--pen);
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  background: var(--pen-soft);
+  color: var(--ink);
+  font-size: 0.95rem;
+}
+.status.visible { display: block; }
+.status.error { border-left-color: var(--red); background: var(--red-soft); color: var(--red); }
+.status.ok { border-left-color: var(--green); background: var(--green-soft); color: var(--green); }
+
+/* Pantallas anchas: amigos y grupos van uno al lado del otro (ver
+   app.component.css) y empiezan a la misma altura, sin raya superior. */
+@media (min-width: 1200px) {
+  section.card { border-top: none; padding-top: 0.5rem; }
+}

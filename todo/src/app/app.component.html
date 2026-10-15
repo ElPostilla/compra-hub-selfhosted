@@ -1,0 +1,86 @@
+<div class="page">
+  <!-- Solo visible en pantallas anchas (ver @media en styles.css) -- en
+       movil la unica forma de cambiar de tablero sigue siendo el boton del
+       header + app-groups-dialog, sin tocar ese flujo ya probado. -->
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Tus tableros</h2>
+    <div class="sidebar-label">Personal</div>
+    <ul class="sidebar-list">
+      <li>
+        <button type="button" [class.active]="state.ownerMode() === 'personal'" (click)="state.switchToPersonal()">
+          Mis tareas
+        </button>
+      </li>
+    </ul>
+    @if (state.groups().length) {
+      <div class="sidebar-label">Grupos compartidos</div>
+      <ul class="sidebar-list">
+        @for (g of state.groups(); track g.id) {
+          <li>
+            <button
+              type="button"
+              [class.active]="state.ownerMode() === 'group' && state.currentGroupId() === g.id"
+              (click)="state.switchToGroup(g.id)"
+            >
+              {{ g.name }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </aside>
+
+  <div class="app">
+  <header>
+    <div class="top-links">
+      <div class="top-links-left">
+        <a class="app-home-link" href="/" aria-label="Inicio"><app-icon name="home"></app-icon></a>
+        <button type="button" class="app-nav-toggle" aria-label="Otras apps" (click)="navDrawer.open()"><app-icon name="menu"></app-icon></button>
+      </div>
+      <app-profile-menu></app-profile-menu>
+    </div>
+    <button type="button" class="board-switch" aria-haspopup="dialog" (click)="openGroupsDialog()">
+      <h1>{{ state.boardName() }}</h1>
+      @if (state.ownerMode() === 'group') {
+        <span class="shared-badge">Grupo</span>
+      }
+      <span class="chevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="view-tabs">
+      <button type="button" class="view-tab" [class.active]="state.boardMode() === 'list'" (click)="state.setBoardMode('list')">
+        Lista
+      </button>
+      <button type="button" class="view-tab" [class.active]="state.boardMode() === 'kanban'" (click)="state.setBoardMode('kanban')">
+        Kanban
+      </button>
+    </div>
+  </header>
+
+  @if (state.boardMode() === 'list') {
+    <form class="quick-add" (submit)="addTask($event)">
+      <input type="text" [(ngModel)]="newTitle" name="newTitle" placeholder="Nueva tarea" />
+      <input type="date" class="due-input" [(ngModel)]="newDueDate" name="newDueDate" aria-label="Fecha límite" />
+      <select class="recurrence-input" [(ngModel)]="newRecurrence" name="newRecurrence" aria-label="Repetición">
+        @for (r of recurrences; track r) {
+          <option [value]="r">{{ recurrenceLabels[r] }}</option>
+        }
+      </select>
+      <select class="importance-input" [(ngModel)]="newImportance" name="newImportance" aria-label="Importancia">
+        @for (i of importances; track i) {
+          <option [value]="i">Importancia {{ importanceLabels[i].toLowerCase() }}</option>
+        }
+      </select>
+      <button type="submit" class="add-btn" aria-label="Añadir tarea"><app-icon name="plus"></app-icon></button>
+    </form>
+    <app-task-list></app-task-list>
+  } @else {
+    <app-kanban-board></app-kanban-board>
+  }
+
+  <div class="toast" [class.visible]="toast.visible()">{{ toast.message() }}</div>
+  </div>
+</div>
+
+<app-groups-dialog></app-groups-dialog>
+<app-nav-drawer #navDrawer></app-nav-drawer>
+<app-asistente app="tareas" [view]="assistantView()" (changed)="onAssistantChanged()"></app-asistente>

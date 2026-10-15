@@ -1,0 +1,111 @@
+<div class="page">
+  <!-- La portada es la pagina del dia del cuaderno: la fecha como
+       titular, lo de hoy escrito en renglones y las apps como
+       separadores de color. -->
+  <header>
+    <div class="top-links">
+      <app-profile-menu></app-profile-menu>
+    </div>
+    <p class="weekday">{{ weekdayLabel }}</p>
+    <h1>{{ dateLabel }}</h1>
+  </header>
+
+  <section class="today" aria-label="Hoy">
+    @if (!summary.loaded()) {
+      <p class="today-empty">Cargando lo de hoy…</p>
+    } @else {
+      @for (note of summary.todayNotes(); track $index) {
+        <p class="today-note" [class]="note.importance">@if (note.time) { <span class="note-time">{{ note.time }}</span> }{{ note.note }}</p>
+      }
+
+      @if (summary.dueTasks().length) {
+        <ul class="today-tasks">
+          @for (task of summary.dueTasks(); track task.id) {
+            <li class="today-task-row">
+              <button type="button" class="today-checkbox" [attr.aria-label]="'Marcar como hecha: ' + task.title" (click)="completeTask(task.id)"></button>
+              <span class="today-task-title">{{ task.title }}</span>
+              <span class="today-due-badge" [class.overdue]="formatDue(task.dueDate!) === 'Atrasada'">
+                {{ formatDue(task.dueDate!) }}
+              </span>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (hasTodayMeals()) {
+        <p class="today-line">
+          <app-icon name="utensils"></app-icon>
+          <span>
+            @if (summary.todayMeals().comida) { Comida: <strong>{{ summary.todayMeals().comida }}</strong> }
+            @if (summary.todayMeals().comida && summary.todayMeals().cena) { <br /> }
+            @if (summary.todayMeals().cena) { Cena: <strong>{{ summary.todayMeals().cena }}</strong> }
+          </span>
+        </p>
+      }
+
+      @for (b of summary.pendingBalances(); track b.groupId) {
+        <p class="today-line debt">
+          <app-icon name="coin"></app-icon>
+          <span>Debes <strong class="num">{{ formatCents(b.balanceCents) }}</strong> en {{ b.groupName }}</span>
+        </p>
+      }
+
+      @if (!summary.todayNotes().length && !summary.dueTasks().length && !hasTodayMeals() && !summary.pendingBalances().length) {
+        <p class="today-empty">Hoy no hay nada apuntado.</p>
+      }
+    }
+  </section>
+
+  <nav class="apps" aria-label="Apps">
+    @for (app of apps; track app.href) {
+      <a class="app-tab" [href]="app.href" [style.--app-tab]="'var(--tab-' + app.tab + ')'">
+        <app-icon class="app-tab-icon" [name]="app.icon"></app-icon>
+        <span class="app-tab-text">
+          <span class="app-name">{{ app.name }}</span>
+          <span class="app-desc">{{ app.desc }}</span>
+        </span>
+      </a>
+    }
+  </nav>
+
+  @if (iosNeedsInstall) {
+    <!-- En iPhone, Apple solo permite notificaciones a las webs añadidas a
+         la pantalla de inicio (iOS 16.4+): sin eso ni siquiera hay boton. -->
+    <div class="push">
+      <p class="push-hint">
+        Para recibir avisos del calendario en el iPhone: pulsa <strong>Compartir</strong> →
+        <strong>Añadir a pantalla de inicio</strong>, abre el hub desde ese icono y activa aquí los avisos.
+      </p>
+    </div>
+  }
+  @if (push.loaded() && push.supported) {
+    <div class="push">
+      <button type="button" class="push-toggle" (click)="togglePush()">
+        @if (push.subscribed()) {
+          <app-icon name="bell"></app-icon> Avisos activados
+        } @else {
+          <app-icon name="bell-off"></app-icon> Activar avisos en este dispositivo
+        }
+      </button>
+      @if (pushError) {
+        <p class="push-error">No se han podido activar. Revisa que el navegador tenga permiso para mostrar notificaciones.</p>
+      }
+    </div>
+  }
+
+  <footer>
+    <a class="brand-link" href="/">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="8" r="3.1"/><circle cx="16" cy="9.5" r="2.2"/><circle cx="10.5" cy="16" r="2.6"/></svg>
+      </span>
+      Hub de casa
+    </a>
+    <nav class="legal-links" aria-label="Información legal">
+      <a href="/legal/privacidad.html">Privacidad</a>
+      <a href="/legal/cookies.html">Cookies</a>
+      <a href="/legal/condiciones.html">Condiciones</a>
+      <a href="/legal/aviso-legal.html">Aviso legal</a>
+    </nav>
+  </footer>
+</div>
+<app-asistente app="inicio" [view]="assistantView()" (changed)="onAssistantChanged()"></app-asistente>

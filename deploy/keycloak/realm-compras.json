@@ -1,0 +1,58 @@
+{
+  "realm": "compras",
+  "displayName": "Hub de casa",
+  "enabled": true,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "bruteForceProtected": true,
+  "internationalizationEnabled": true,
+  "supportedLocales": ["es", "en"],
+  "defaultLocale": "es",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 86400,
+  "ssoSessionMaxLifespan": 86400,
+  "offlineSessionIdleTimeout": 2592000,
+  "clients": [
+    {
+      "clientId": "compras",
+      "name": "Hub de casa",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${OAUTH2_PROXY_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "serviceAccountsEnabled": false,
+      "rootUrl": "https://${HUB_DOMAIN}",
+      "baseUrl": "/",
+      "redirectUris": [
+        "https://${HUB_DOMAIN}/oauth2/callback",
+        "https://${HUB_DOMAIN}/legal/*"
+      ],
+      "webOrigins": ["https://${HUB_DOMAIN}"],
+      "attributes": {
+        "post.logout.redirect.uris": "https://${HUB_DOMAIN}/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "audiencia-compras",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "compras",
+            "access.token.claim": "true",
+            "id.token.claim": "false"
+          }
+        }
+      ]
+    }
+  ]
+}

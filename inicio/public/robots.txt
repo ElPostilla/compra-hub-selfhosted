@@ -1,0 +1,5 @@
+# El hub es una aplicacion privada: todo esta detras del inicio de sesion.
+# Lo unico publico son las paginas legales.
+User-agent: *
+Allow: /legal/
+Disallow: /

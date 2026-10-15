@@ -1,0 +1,650 @@
+/* =====================================================================
+   hub-theme.css — «el cuaderno de casa»
+   Base visual COMUN de las 8 apps del hub. Hay una copia identica en
+   <app>/src/hub-theme.css de cada app (cada una es un build de
+   Angular independiente): se edita aqui, en inicio, y se copia al resto.
+   Cada app solo define su color de separador (--tab) y sus estilos
+   propios en su styles.css, que importa este fichero primero.
+
+   Idea: el hub es la libreta que la familia tiene en la nevera. Papel de
+   cuadricula, texto en azul boligrafo, un separador de color por app, y
+   una unica floritura: tachar a mano lo que ya esta hecho.
+   ===================================================================== */
+
+/* Recursive (variable, ejes wght + CASL), alojada una sola vez en inicio
+   (ruta absoluta /fonts/...) para que las 8 apps compartan la cache. */
+@font-face {
+  font-family: 'Recursive';
+  src: url('/fonts/recursive.woff2') format('woff2-variations'),
+       url('/fonts/recursive.woff2') format('woff2');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* Papel y tinta */
+  --desk: #e6eae4;          /* lo que hay detras de la hoja */
+  --paper: #fbfbf6;
+  --paper-2: #f1f3ec;       /* campos, zonas hundidas */
+  --grid: #e8edf2;          /* cuadricula */
+  --rule: #c9d4e2;          /* renglones y separadores */
+  --ink: #1e2a5e;           /* boli azul: el texto principal */
+  --ink-soft: #56608a;
+  --ink-faint: #8a92b2;
+  --pen: #2b45c4;           /* accion principal */
+  --pen-strong: #1d3196;
+  --pen-soft: #e2e7fa;
+  --on-pen: #ffffff;
+  --marker: #f7e463;        /* fosforito: solo "hoy" y lo pendiente */
+  --marker-ink: #3a3300;
+  --red: #c4302b;           /* boli rojo: borrar, atrasado */
+  --red-soft: #f8e0dd;
+  --green: #2e7a55;
+  --green-soft: #dcefe4;
+  --sheet-shadow: 0 1px 0 rgba(30, 42, 94, 0.06), 0 10px 30px -18px rgba(30, 42, 94, 0.35);
+  --pop-shadow: 0 18px 50px -12px rgba(20, 28, 60, 0.45);
+
+  /* Separadores del cuaderno: un color por app (apagados, no chillones) */
+  --tab-inicio: #1e2a5e;
+  --tab-compra: #e2b13c;
+  --tab-tareas: #5f9fd6;
+  --tab-calendario: #d7708b;
+  --tab-gastos: #5aa97c;
+  --tab-menu: #e3874a;
+  --tab-social: #9384d3;
+  --tab-perfil: #8a92b2;
+  --tab: var(--tab-inicio);
+
+  /* Importancia de notas (calendario, "Hoy" en inicio) */
+  --imp-baja: #5f9fd6;
+  --imp-media: #e2b13c;
+  --imp-alta: #c4302b;
+
+  --font: 'Recursive', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --r-s: 6px;
+  --r-m: 10px;
+  --r-l: 16px;
+  --tap: 44px;              /* tamaño minimo tactil */
+  --grid-size: 24px;
+
+  /* Trazo de "tachar a mano" (SVG con el color incrustado: una variable
+     CSS no puede entrar dentro de un data: URI). */
+  --strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'%3E%3Cpath d='M1 13.5C18 10 33 15 50 12.2S82 9.6 99 12.8' fill='none' stroke='%232b45c4' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  /* Alias de los nombres antiguos (paleta iOS): los componentes que aun
+     los usan siguen funcionando con el nuevo sistema. */
+  --bg: var(--desk);
+  --surface: var(--paper);
+  --surface-2: var(--paper-2);
+  --line: var(--rule);
+  --accent: var(--pen);
+  --accent-strong: var(--pen-strong);
+  --accent-soft: var(--pen-soft);
+  --accent-ink: var(--on-pen);
+  --danger: var(--red);
+  --danger-soft: var(--red-soft);
+  --shadow: var(--sheet-shadow);
+  --toast-bg: var(--ink);
+  --toast-ink: var(--paper);
+
+  color-scheme: light;
+}
+
+/* Cuaderno de noche: azul marino, no negro. */
+:root[data-theme='dark'] {
+  --desk: #0a0f1d;
+  --paper: #121a2d;
+  --paper-2: #192239;
+  --grid: #19223a;
+  --rule: #2a3555;
+  --ink: #e3e7f4;
+  --ink-soft: #a4acc9;
+  --ink-faint: #6f789c;
+  --pen: #95a8ff;
+  --pen-strong: #b7c4ff;
+  --pen-soft: #1e2852;
+  --on-pen: #0a0f1d;
+  --marker: #d8c443;
+  --marker-ink: #1d1a00;
+  --red: #ff7d72;
+  --red-soft: #3b1d24;
+  --green: #72d3a1;
+  --green-soft: #16332a;
+  --sheet-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 12px 32px -18px rgba(0, 0, 0, 0.8);
+  --pop-shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.8);
+  --tab-inicio: #e3e7f4;
+  --tab-compra: #d6a93f;
+  --tab-tareas: #6aa8dd;
+  --tab-calendario: #db7f98;
+  --tab-gastos: #66b889;
+  --tab-menu: #e3935c;
+  --tab-social: #a193dc;
+  --tab-perfil: #8f98ba;
+  --imp-baja: #6aa8dd;
+  --imp-media: #d6a93f;
+  --imp-alta: #ff7d72;
+  --strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'%3E%3Cpath d='M1 13.5C18 10 33 15 50 12.2S82 9.6 99 12.8' fill='none' stroke='%2395a8ff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --desk: #0a0f1d;
+    --paper: #121a2d;
+    --paper-2: #192239;
+    --grid: #19223a;
+    --rule: #2a3555;
+    --ink: #e3e7f4;
+    --ink-soft: #a4acc9;
+    --ink-faint: #6f789c;
+    --pen: #95a8ff;
+    --pen-strong: #b7c4ff;
+    --pen-soft: #1e2852;
+    --on-pen: #0a0f1d;
+    --marker: #d8c443;
+    --marker-ink: #1d1a00;
+    --red: #ff7d72;
+    --red-soft: #3b1d24;
+    --green: #72d3a1;
+    --green-soft: #16332a;
+    --sheet-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), 0 12px 32px -18px rgba(0, 0, 0, 0.8);
+    --pop-shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.8);
+    --tab-inicio: #e3e7f4;
+    --tab-compra: #d6a93f;
+    --tab-tareas: #6aa8dd;
+    --tab-calendario: #db7f98;
+    --tab-gastos: #66b889;
+    --tab-menu: #e3935c;
+    --tab-social: #a193dc;
+    --tab-perfil: #8f98ba;
+    --imp-baja: #6aa8dd;
+  --imp-media: #d6a93f;
+  --imp-alta: #ff7d72;
+    --strike: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'%3E%3Cpath d='M1 13.5C18 10 33 15 50 12.2S82 9.6 99 12.8' fill='none' stroke='%2395a8ff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E");
+    color-scheme: dark;
+  }
+}
+
+/* ------------------------------------------------------------ base */
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--desk);
+  color: var(--ink);
+  font-family: var(--font);
+  font-variation-settings: 'CASL' 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--pen); }
+
+/* La voz "a mano": el eje casual de Recursive, para titulos y rotulos. */
+.hand,
+h1, h2, h3,
+.sidebar-title, .dialog-inner h2, .nav-drawer-title, .cat-label {
+  font-variation-settings: 'CASL' 1;
+  letter-spacing: -0.01em;
+}
+h1 { font-size: 2rem; line-height: 1.1; font-weight: 700; margin: 0; }
+h2 { font-size: 1.3rem; line-height: 1.2; font-weight: 650; margin: 0; }
+h3 { font-size: 1.1rem; line-height: 1.25; font-weight: 650; margin: 0; }
+.num, .item-qty, .count, .price-value { font-variant-numeric: tabular-nums; }
+
+:focus-visible {
+  outline: 2.5px solid var(--pen);
+  outline-offset: 2px;
+  border-radius: var(--r-s);
+}
+
+/* ------------------------------------------------------------ la hoja */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 100dvh;
+}
+/* La hoja de cuaderno: papel con cuadricula y el separador de color de
+   la app en el borde superior. */
+.app {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: -1px -1px;
+  border-top: 6px solid var(--tab);
+  padding: env(safe-area-inset-top, 0) 0 env(safe-area-inset-bottom, 0);
+}
+
+/* ------------------------------------------------------------ cabecera */
+
+header {
+  padding: 0.75rem 1.1rem 1rem;
+  border-bottom: 1.5px solid var(--rule);
+  background: linear-gradient(var(--paper) 55%, transparent);
+}
+.top-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: var(--tap);
+  margin-bottom: 0.4rem;
+}
+.top-links-left { display: flex; align-items: center; gap: 0.35rem; }
+.app-home-link,
+.app-nav-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  border-radius: var(--r-m);
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.25rem;
+  line-height: 1;
+  text-decoration: none;
+  cursor: pointer;
+}
+.app-home-link:hover,
+.app-nav-toggle:hover { background: var(--paper-2); }
+.app-home-link:active,
+.app-nav-toggle:active { background: var(--pen-soft); }
+
+/* Titulo de la pagina, que abre el selector de lista/tablero/cuenta. Cada
+   app lo llama a su manera (list-, board-, calendar-, account-switch). */
+.list-switch, .board-switch, .calendar-switch, .account-switch {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  max-width: 100%;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.list-switch h1, .board-switch h1, .calendar-switch h1, .account-switch h1, header h1 {
+  font-size: clamp(1.9rem, 7vw, 2.4rem);
+  font-weight: 750;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: calc(100vw - 5rem);
+}
+.chevron {
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+  transform: translateY(-2px);
+}
+.shared-badge {
+  flex: 0 0 auto;
+  align-self: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--tab) 30%, transparent);
+  border-radius: var(--r-s);
+  padding: 0.1rem 0.45rem;
+}
+
+/* ------------------------------------------------------------ controles */
+
+input[type='text'],
+input[type='search'],
+input[type='number'],
+input[type='date'],
+input[type='time'],
+input[type='email'],
+input:not([type]),
+select,
+textarea {
+  min-height: var(--tap);
+  padding: 0.55rem 0.75rem;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input::placeholder, textarea::placeholder { color: var(--ink-faint); opacity: 1; }
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none;
+  border-color: var(--pen);
+  box-shadow: 0 0 0 3px var(--pen-soft);
+}
+input[type='checkbox'] { accent-color: var(--pen); width: 1.15rem; height: 1.15rem; }
+
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+
+/* Boton principal: tinta llena. */
+.btn-primary,
+.add-btn {
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 0 1rem;
+  border: none;
+  border-radius: var(--r-m);
+  background: var(--pen);
+  color: var(--on-pen);
+  font-weight: 650;
+  font-size: 1rem;
+}
+.btn-primary:hover, .add-btn:hover { background: var(--pen-strong); }
+.add-btn { padding: 0; font-size: 1.5rem; line-height: 1; }
+
+/* Boton secundario: dibujado a boli, sin relleno. */
+.btn-secondary {
+  min-height: 38px;
+  padding: 0 0.85rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+}
+.btn-secondary:hover { border-color: var(--ink-soft); }
+.btn-danger { color: var(--red); }
+
+/* Texto-boton subrayado. */
+.text-btn {
+  min-height: 36px;
+  padding: 0 0.3rem;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.text-btn:hover { color: var(--ink); }
+.text-btn:disabled { visibility: hidden; }
+
+/* ------------------------------------------------------------ tachar a mano */
+
+/* Lo hecho se tacha con un trazo de boli (unica animacion "de adorno" del
+   hub, y solo responde a una accion). La animacion se habilita despues
+   de la primera carga (clase hub-ready en <html>, ver index.html) para no
+   tachar todo lo ya hecho cada vez que se abre la app. */
+/* Un trazo por cada linea de texto: el fondo se repite en vertical con la
+   altura de una linea (1lh; 1.5em donde no hay lh). */
+.struck {
+  color: var(--ink-faint);
+  background-image: var(--strike);
+  background-repeat: repeat-y;
+  background-position: left top;
+  background-size: 100% 1.5em;
+  background-size: 100% 1lh;
+}
+.hub-ready .struck { animation: hub-strike 0.38s cubic-bezier(0.3, 0.7, 0.4, 1) both; }
+@keyframes hub-strike {
+  from { background-size: 0% 1lh; }
+  to { background-size: 100% 1lh; }
+}
+
+/* ------------------------------------------------------------ vacio / estados */
+
+.empty {
+  margin: 0;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-variation-settings: 'CASL' 1;
+  font-size: 1.1rem;
+}
+
+/* ------------------------------------------------------------ aviso (toast) */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 8px);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  max-width: calc(100% - 2rem);
+  padding: 0.7rem 0.7rem 0.7rem 1rem;
+  border-radius: var(--r-m);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 0.92rem;
+  box-shadow: var(--pop-shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 200;
+}
+.toast.visible { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.toast button {
+  border: none;
+  background: var(--marker);
+  color: var(--marker-ink);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--r-s);
+}
+
+/* ------------------------------------------------------------ dialogos */
+
+dialog {
+  width: min(440px, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: none;
+  border-top: 6px solid var(--tab);
+  border-radius: var(--r-l);
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--pop-shadow);
+}
+dialog::backdrop { background: rgba(14, 20, 44, 0.5); }
+.dialog-inner { padding: 1.25rem 1.25rem 1rem; }
+.dialog-inner h2 { font-size: 1.45rem; font-weight: 700; margin: 0 0 1rem; }
+
+/* Selector de lista / tablero / grupo (dialogo que abre el titulo en
+   movil). Mismo patron en varias apps con nombres de clase distintos
+   (list-row-name, board-row-name...): de ahi los selectores por sufijo. */
+.list-section-label {
+  margin: 1.1rem 0 0.3rem;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.list-section-label:first-child { margin-top: 0; }
+dialog ul { list-style: none; margin: 0 0 0.75rem; padding: 0; max-height: 40vh; overflow-y: auto; }
+dialog ul li {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 46px;
+  border-bottom: 1px solid var(--rule);
+}
+dialog ul li:last-child { border-bottom: none; }
+[class$='-row-name'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font-size: 1.02rem;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+dialog ul li.active [class$='-row-name'] { font-weight: 700; }
+dialog ul li.active [class$='-row-name']::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 0.5rem;
+  border-radius: 3px;
+  background: var(--tab);
+}
+[class$='-row-meta'] { flex: 0 0 auto; color: var(--ink-soft); font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+[id^='close-'][id$='-dialog'], .close-dialog-btn {
+  width: 100%;
+  min-height: var(--tap);
+  margin-top: 0.25rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: none;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+[id^='close-'][id$='-dialog']:hover, .close-dialog-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+/* ------------------------------------------------------------ menu de apps (☰) */
+
+.nav-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(14, 20, 44, 0.5);
+}
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: min(300px, 84vw);
+  overflow-y: auto;
+  padding: calc(1.25rem + env(safe-area-inset-top, 0px)) 0.9rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: var(--pop-shadow);
+  animation: hub-drawer-in 0.2s ease-out;
+}
+@keyframes hub-drawer-in { from { transform: translateX(-100%); } }
+.nav-drawer-title { font-size: 1.6rem; font-weight: 750; margin: 0 0 1rem 0.35rem; }
+.nav-drawer-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.15rem; }
+.nav-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 48px;
+  padding: 0 0.6rem 0 0;
+  border-radius: var(--r-m);
+  color: var(--ink);
+  font-size: 1.02rem;
+  text-decoration: none;
+}
+/* Pestaña de color de cada app, como los separadores de un cuaderno. */
+.nav-drawer-item::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 8px;
+  height: 28px;
+  border-radius: 0 4px 4px 0;
+  background: var(--item-tab, var(--rule));
+  transition: width 0.15s ease;
+}
+.nav-drawer-item svg { width: 1.3rem; height: 1.3rem; flex: 0 0 auto; color: var(--ink-soft); }
+a.nav-drawer-item:hover { background: var(--paper-2); }
+.nav-drawer-item.current { font-weight: 700; background: var(--paper-2); }
+.nav-drawer-item.current::before { width: 14px; }
+.nav-drawer-item.current svg { color: var(--ink); }
+
+/* ------------------------------------------------------------ escritorio */
+
+/* Panel lateral persistente (listas, tableros, grupos): solo en pantallas
+   anchas. En movil se usa el dialogo que abre el titulo. */
+.sidebar { display: none; }
+
+/* Escritorio: el indice fijo a la izquierda y la hoja ocupando todo el
+   resto de la pantalla (ancho y alto). Cada app reparte su contenido en
+   columnas cuando hay sitio, como una libreta abierta, en vez de estirar
+   renglones de 1500px. */
+@media (min-width: 900px) {
+  body { padding: 1.5rem 2rem; }
+  .page {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 2rem;
+    max-width: none;
+    min-height: calc(100dvh - 3rem);
+    margin: 0;
+  }
+  .app {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: none;
+    min-height: calc(100dvh - 3rem);
+    border-radius: 4px 4px var(--r-l) var(--r-l);
+    box-shadow: var(--sheet-shadow);
+    padding-bottom: 1.5rem;
+  }
+  header { padding: 1rem 2rem 1.25rem; }
+  .list-switch h1, .board-switch h1, .calendar-switch h1, .account-switch h1, header h1 { max-width: none; font-size: 2.6rem; }
+
+  /* Indice del cuaderno: sobre la mesa, sin tarjeta. */
+  .sidebar {
+    display: block;
+    flex: 0 0 240px;
+    align-self: flex-start;
+    position: sticky;
+    top: 1.5rem;
+    padding: 0.5rem 0;
+  }
+  .sidebar-title { font-size: 1.5rem; font-weight: 750; margin: 0 0 1.1rem; }
+  .sidebar-label {
+    margin: 1.2rem 0 0.35rem;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .sidebar-label:first-of-type { margin-top: 0; }
+  .sidebar-list { list-style: none; margin: 0; padding: 0; }
+  .sidebar-list li { padding: 0; border: none; min-height: 0; }
+  .sidebar-list button {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 0.75rem;
+    border: none;
+    border-left: 4px solid transparent;
+    border-radius: 0 var(--r-m) var(--r-m) 0;
+    background: none;
+    color: var(--ink);
+    font-size: 0.98rem;
+    text-align: left;
+  }
+  .sidebar-list button:hover { background: color-mix(in srgb, var(--paper) 60%, transparent); }
+  .sidebar-list button.active {
+    border-left-color: var(--tab);
+    background: var(--paper);
+    font-weight: 700;
+    box-shadow: var(--sheet-shadow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

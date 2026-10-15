@@ -1,0 +1,22 @@
+{
+  "name": "calendario-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "google-auth-library": "^9.14.0",
+    "pg": "^8.13.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
+    "ws": "^8.18.0"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

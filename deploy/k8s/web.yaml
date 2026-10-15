@@ -1,0 +1,345 @@
+# Las 8 apps web (Angular compilado, servido con nginx).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inicio
+  labels:
+    app: inicio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inicio
+  template:
+    metadata:
+      labels:
+        app: inicio
+    spec:
+      containers:
+        - name: inicio
+          image: compra-hub/inicio:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: inicio
+spec:
+  selector:
+    app: inicio
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lista-compra
+  labels:
+    app: lista-compra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lista-compra
+  template:
+    metadata:
+      labels:
+        app: lista-compra
+    spec:
+      containers:
+        - name: lista-compra
+          image: compra-hub/lista-compra:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lista-compra
+spec:
+  selector:
+    app: lista-compra
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendario
+  labels:
+    app: calendario
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calendario
+  template:
+    metadata:
+      labels:
+        app: calendario
+    spec:
+      containers:
+        - name: calendario
+          image: compra-hub/calendario:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calendario
+spec:
+  selector:
+    app: calendario
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo
+  labels:
+    app: todo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo
+  template:
+    metadata:
+      labels:
+        app: todo
+    spec:
+      containers:
+        - name: todo
+          image: compra-hub/todo:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo
+spec:
+  selector:
+    app: todo
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gastos
+  labels:
+    app: gastos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gastos
+  template:
+    metadata:
+      labels:
+        app: gastos
+    spec:
+      containers:
+        - name: gastos
+          image: compra-hub/gastos:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gastos
+spec:
+  selector:
+    app: gastos
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: menu
+  labels:
+    app: menu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: menu
+  template:
+    metadata:
+      labels:
+        app: menu
+    spec:
+      containers:
+        - name: menu
+          image: compra-hub/menu:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: menu
+spec:
+  selector:
+    app: menu
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: perfil
+  labels:
+    app: perfil
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: perfil
+  template:
+    metadata:
+      labels:
+        app: perfil
+    spec:
+      containers:
+        - name: perfil
+          image: compra-hub/perfil:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: perfil
+spec:
+  selector:
+    app: perfil
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grupos
+  labels:
+    app: grupos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grupos
+  template:
+    metadata:
+      labels:
+        app: grupos
+    spec:
+      containers:
+        - name: grupos
+          image: compra-hub/grupos:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grupos
+spec:
+  selector:
+    app: grupos
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

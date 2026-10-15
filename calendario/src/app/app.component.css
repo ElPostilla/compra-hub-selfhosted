@@ -1,0 +1,3 @@
+/* Todo el CSS de contenido vive en styles.css (global): lo comparten los
+   componentes hijos (dialogos), y el view encapsulation de Angular no
+   dejaria que reglas de aqui les llegasen. */

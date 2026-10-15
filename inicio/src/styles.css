@@ -1,0 +1,5 @@
+/* Inicio (portada del hub). La base comun vive en hub-theme.css; los
+   estilos propios de la portada, en app/app.component.css. */
+@import './hub-theme.css';
+
+:root { --tab: var(--tab-inicio); }

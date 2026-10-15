@@ -1,0 +1,17 @@
+{
+  "name": "Lista de la compra",
+  "short_name": "Compra",
+  "description": "Lista de la compra con categorías automáticas, varias listas, historial y guardado local.",
+  "start_url": "/lista/",
+  "scope": "/lista/",
+  "display": "standalone",
+  "background_color": "#f6f4ee",
+  "theme_color": "#2e7d46",
+  "lang": "es",
+  "icons": [
+    { "src": "/lista/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/lista/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/lista/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/lista/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

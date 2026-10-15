@@ -1,0 +1,237 @@
+<div class="page">
+  <!-- Solo visible en pantallas anchas (ver @media en styles.css) -- en
+       movil la unica forma de cambiar de cuenta sigue siendo el boton del
+       header + app-groups-dialog, sin tocar ese flujo ya probado. -->
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Tus cuentas</h2>
+    <div class="sidebar-label">Personal</div>
+    <ul class="sidebar-list">
+      <li>
+        <button type="button" [class.active]="state.ownerMode() === 'personal'" (click)="state.switchToPersonal()">
+          Mis gastos
+        </button>
+      </li>
+    </ul>
+    @if (state.groups().length) {
+      <div class="sidebar-label">Grupos compartidos</div>
+      <ul class="sidebar-list">
+        @for (g of state.groups(); track g.id) {
+          <li>
+            <button
+              type="button"
+              [class.active]="state.ownerMode() === 'group' && state.currentGroupId() === g.id"
+              (click)="state.switchToGroup(g.id)"
+            >
+              {{ g.name }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </aside>
+
+  <div class="app">
+  <header>
+    <div class="top-links">
+      <div class="top-links-left">
+        <a class="app-home-link" href="/" aria-label="Inicio"><app-icon name="home"></app-icon></a>
+        <button type="button" class="app-nav-toggle" aria-label="Otras apps" (click)="navDrawer.open()"><app-icon name="menu"></app-icon></button>
+      </div>
+      <app-profile-menu></app-profile-menu>
+    </div>
+    <button type="button" class="account-switch" aria-haspopup="dialog" (click)="openGroupsDialog()">
+      <h1>{{ state.accountName() }}</h1>
+      @if (state.ownerMode() === 'group') {
+        <span class="shared-badge">Grupo</span>
+      }
+      <span class="chevron" aria-hidden="true">⌄</span>
+    </button>
+  </header>
+
+  <!-- En movil aparece justo aqui, entre el titulo y el formulario, igual
+       que antes de separarlo del header -- ver grid-template-areas en
+       styles.css para donde acaba en pantallas anchas. -->
+  <aside class="summary">
+    @if (state.ownerMode() === 'personal') {
+      <div class="month-total"><span>Este mes</span><strong>{{ formatCents(state.monthTotalCents()) }}</strong></div>
+    } @else if (state.balances().length) {
+      <div class="balances">
+        @for (b of state.balances(); track b.userId) {
+          <div class="balance-row">
+            <span class="balance-identity">
+              <app-avatar size="sm" [username]="b.username"></app-avatar>
+              <span class="balance-name">&#64;{{ b.username }}</span>
+            </span>
+            <span class="balance-amount" [class.positive]="b.balanceCents > 0" [class.negative]="b.balanceCents < 0">
+              {{ b.balanceCents > 0 ? 'le deben ' : b.balanceCents < 0 ? 'debe ' : '' }}{{ formatCents(absCents(b.balanceCents)) }}
+            </span>
+          </div>
+        }
+      </div>
+      <div class="debts">
+        <h2 class="debts-title">Quién debe a quién</h2>
+        @if (state.debts().length) {
+          <ul class="debts-list">
+            @for (d of state.debts(); track d.fromUserId + d.toUserId) {
+              <li class="debt-row">
+                <span class="debt-who">
+                  <app-avatar size="xs" [username]="d.fromUsername || '?'"></app-avatar>
+                  <span>&#64;{{ d.fromUsername || 'antiguo miembro' }}</span>
+                  <span class="debt-arrow">debe a</span>
+                  <app-avatar size="xs" [username]="d.toUsername || '?'"></app-avatar>
+                  <span>&#64;{{ d.toUsername || 'antiguo miembro' }}</span>
+                </span>
+                <span class="debt-amount">{{ formatCents(d.amountCents) }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="debts-clear"><app-icon name="check"></app-icon> Todo saldado</p>
+        }
+      </div>
+    }
+
+    @if (state.categoryTotals().length) {
+      <div class="category-breakdown">
+        @for (c of state.categoryTotals(); track c.category.key) {
+          <div class="category-row">
+            <span class="category-label"><app-icon [name]="c.category.icon"></app-icon> {{ c.category.label }}</span>
+            <div class="category-bar-track">
+              <div
+                class="category-bar-fill"
+                [attr.data-cat]="c.category.key"
+                [class.over-budget]="isOverBudget(c.totalCents, c.budgetCents)"
+                [style.width.%]="categoryPct(c.totalCents)"
+              ></div>
+            </div>
+            <span class="category-amount" [class.over-budget-text]="isOverBudget(c.totalCents, c.budgetCents)">
+              {{ formatCents(c.totalCents) }}{{ c.budgetCents !== null ? ' / ' + formatCents(c.budgetCents) : '' }}
+            </span>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="header-links">
+      <button type="button" class="budgets-link" (click)="openBudgetsDialog()">Ajustar presupuesto</button>
+      <button type="button" class="budgets-link" (click)="openHistoryDialog()">Ver meses anteriores</button>
+    </div>
+  </aside>
+
+  <form class="quick-add" (submit)="addExpense($event)">
+    <input type="text" [(ngModel)]="newDescription" name="newDescription" placeholder="Descripción" />
+    <input type="text" inputmode="decimal" class="amount-input" [(ngModel)]="newAmount" name="newAmount" placeholder="0,00 €" />
+    <select class="category-select" [(ngModel)]="newCategory" name="newCategory">
+      @for (c of categories; track c.key) {
+        <option [value]="c.key">{{ c.label }}</option>
+      }
+    </select>
+    <input type="date" class="due-input" [(ngModel)]="newDate" name="newDate" aria-label="Fecha" />
+    <label class="recurrence-check">
+      <input type="checkbox" [ngModel]="newRecurrence === 'monthly'" (ngModelChange)="newRecurrence = $event ? 'monthly' : 'none'" name="newRecurrence" />
+      Repetir cada mes
+    </label>
+    <button type="submit" class="add-btn" aria-label="Añadir gasto"><app-icon name="plus"></app-icon></button>
+    @if (state.ownerMode() === 'group' && state.members().length > 1) {
+      <div class="split">
+        <button type="button" class="split-toggle" [attr.aria-expanded]="splitOpen" (click)="splitOpen = !splitOpen">
+          <app-icon name="people"></app-icon>
+          <span>{{ splitSummary() }}</span>
+          <span class="chevron" aria-hidden="true">{{ splitOpen ? '⌃' : '⌄' }}</span>
+        </button>
+        @if (splitOpen) {
+          <div class="split-fields">
+            <label class="split-payer">
+              <span class="split-label">Pagó</span>
+              <select [ngModel]="payerId()" (ngModelChange)="newPaidBy = $event" name="newPaidBy">
+                @for (m of state.members(); track m.userId) {
+                  <option [value]="m.userId">&#64;{{ m.username }}</option>
+                }
+              </select>
+            </label>
+            <div class="split-label">Deben su parte</div>
+            <div class="member-chips" role="group" aria-label="Entre quién se reparte">
+              @for (m of state.members(); track m.userId) {
+                <button
+                  type="button"
+                  class="member-chip"
+                  [class.on]="isParticipant(m.userId)"
+                  [attr.aria-pressed]="isParticipant(m.userId)"
+                  (click)="toggleParticipant(m.userId)"
+                >
+                  <app-avatar size="xs" [username]="m.username"></app-avatar>
+                  &#64;{{ m.username }}
+                  @if (isParticipant(m.userId)) { <app-icon name="check"></app-icon> }
+                </button>
+              }
+            </div>
+            @if (splitPreview()) {
+              <p class="split-preview">Cada uno: {{ splitPreview() }}</p>
+            }
+          </div>
+        }
+      </div>
+    }
+  </form>
+
+  <div class="expense-list-wrap">
+    @if (state.expenses().length) {
+      <ul class="expense-list">
+        @for (expense of state.expenses(); track expense.id) {
+          <li class="expense-row">
+            <span class="expense-cat-icon" [attr.data-cat]="categoryOf(expense.category).key" [title]="categoryOf(expense.category).label"><app-icon [name]="categoryOf(expense.category).icon"></app-icon></span>
+            <div class="expense-info">
+              <span class="expense-desc">
+                {{ expense.description }}
+                @if (expense.recurrence === 'monthly') { <span class="recurrence-icon" title="Se repite cada mes"><app-icon name="repeat"></app-icon></span> }
+              </span>
+              <span class="expense-meta">
+                {{ formatDate(expense.date) }}
+                @if (paidByLabel(expense)) {
+                  · pagó
+                  <span class="expense-paidby">
+                    <app-avatar size="xs" [username]="paidByLabel(expense)"></app-avatar>
+                    &#64;{{ paidByLabel(expense) }}
+                  </span>
+                }
+              </span>
+            </div>
+            <span class="expense-amount">{{ formatCents(expense.amountCents) }}</span>
+            <button type="button" class="expense-del" [attr.aria-label]="'Eliminar ' + expense.description" (click)="remove(expense.id)"><app-icon name="close"></app-icon></button>
+            @if (debtorShares(expense).length) {
+              <div class="share-chips" role="group" [attr.aria-label]="'Quién debe en ' + expense.description">
+                @for (sh of debtorShares(expense); track sh.userId) {
+                  <button
+                    type="button"
+                    class="share-chip"
+                    [class.settled]="sh.settled"
+                    [attr.aria-pressed]="sh.settled"
+                    [title]="sh.settled ? 'Ya pagado — toca para deshacer' : 'Toca cuando lo haya pagado'"
+                    (click)="toggleSettled(expense, sh)"
+                  >
+                    <app-avatar size="xs" [username]="usernameOf(sh.userId)"></app-avatar>
+                    <span class="share-name">&#64;{{ usernameOf(sh.userId) }}</span>
+                    <span class="share-amount">{{ formatCents(sh.shareCents) }}</span>
+                    @if (sh.settled) { <app-icon name="check"></app-icon><span class="share-state">pagado</span> }
+                    @else { <span class="share-state">debe</span> }
+                  </button>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="empty">Aún no hay gastos apuntados. Añade arriba el primero.</p>
+    }
+  </div>
+
+  <div class="toast" [class.visible]="toast.visible()">{{ toast.message() }}</div>
+  </div>
+</div>
+
+<app-groups-dialog></app-groups-dialog>
+<app-budgets-dialog></app-budgets-dialog>
+<app-history-dialog></app-history-dialog>
+<app-nav-drawer #navDrawer></app-nav-drawer>
+<app-asistente app="gastos" [view]="assistantView()" (changed)="onAssistantChanged()"></app-asistente>

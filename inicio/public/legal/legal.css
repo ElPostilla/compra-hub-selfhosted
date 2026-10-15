@@ -1,0 +1,59 @@
+/* Paginas legales publicas (/legal, sin login): misma estetica de
+   «cuaderno de casa» que las apps, pero autonoma (no carga hub-theme.css,
+   que va detras del login). */
+@font-face {
+  font-family: 'Recursive';
+  src: url('/fonts/recursive.woff2') format('woff2');
+  font-weight: 300 1000;
+  font-display: swap;
+}
+:root {
+  --paper: #fbfbf6;
+  --ink: #1e2a5e;
+  --ink-soft: #56608a;
+  --pen: #2b45c4;
+  --rule: #cfd6ea;
+  --marker: #f7e463;
+  --grid: rgba(43, 69, 196, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141a36;
+    --ink: #e9ecf8;
+    --ink-soft: #a4acc9;
+    --pen: #8ea2ff;
+    --rule: #2f3a66;
+    --grid: rgba(142, 162, 255, 0.06);
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+  font-family: 'Recursive', system-ui, sans-serif;
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+main { max-width: 760px; margin: 0 auto; padding: 2rem 16px 4rem; }
+h1, h2 { font-variation-settings: 'CASL' 1; line-height: 1.2; }
+h1 { font-size: 2.1rem; margin: 0.5rem 0 0.3rem; }
+h2 { font-size: 1.3rem; margin: 2rem 0 0.5rem; padding-top: 1rem; border-top: 1.5px solid var(--rule); }
+h3 { font-size: 1.05rem; margin: 1.2rem 0 0.3rem; }
+p, li { max-width: 68ch; }
+ul { padding-left: 1.2rem; }
+li { margin-bottom: 0.35rem; }
+a { color: var(--pen); }
+a:focus-visible { outline: 2px solid var(--pen); outline-offset: 2px; }
+.updated { color: var(--ink-soft); margin: 0 0 1.5rem; }
+.back { display: inline-block; margin-bottom: 0.5rem; font-weight: 600; }
+.summary { padding: 0.9rem 1rem; border-left: 4px solid var(--marker); background: rgba(247, 228, 99, 0.18); }
+table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.95rem; }
+th, td { text-align: left; vertical-align: top; padding: 0.5rem 0.4rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 700; }
+.table-wrap { overflow-x: auto; }
+footer { margin-top: 3rem; padding-top: 1rem; border-top: 1.5px solid var(--rule); color: var(--ink-soft); font-size: 0.92rem; }
+footer a { margin-right: 0.8rem; }

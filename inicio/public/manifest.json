@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "name": "El hub de casa",
+  "short_name": "Casa",
+  "description": "Lista de la compra, tareas, calendario, gastos y menú semanal compartidos con tu familia o tu piso, con un asistente que apunta por ti.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbfbf6",
+  "theme_color": "#fbfbf6",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["lifestyle", "productivity", "food"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Lista de la compra", "short_name": "Compra", "url": "/lista/", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Tareas", "url": "/todo/", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Menú semanal", "short_name": "Menú", "url": "/menu/", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Gastos", "url": "/gastos/", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

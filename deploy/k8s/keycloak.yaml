@@ -1,0 +1,84 @@
+# Keycloak incluido, servido en https://<HUB_DOMAIN>/auth (mismo dominio que
+# el hub). Si ya tienes un Keycloak, quita este fichero de
+# ../kustomization.yaml y sigue la seccion «Usar un Keycloak que ya tienes»
+# del README.
+#
+# Importa el realm "compras" desde keycloak/realm-compras.json la primera
+# vez (si el realm ya existe no lo toca). Usa la base "keycloak" del
+# Postgres del hub.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.7.5
+          args: ["start", "--import-realm"]
+          env:
+            - name: HUB_DOMAIN
+              valueFrom: { configMapKeyRef: { name: hub-config, key: HUB_DOMAIN } }
+            - { name: KC_DB, value: postgres }
+            - { name: KC_DB_URL, value: "jdbc:postgresql://postgres:5432/keycloak" }
+            - { name: KC_DB_USERNAME, value: keycloak }
+            - name: KC_DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: hub-secrets, key: KEYCLOAK_DB_PASSWORD } }
+            - { name: KC_HTTP_ENABLED, value: "true" }
+            - { name: KC_HTTP_RELATIVE_PATH, value: /auth }
+            - { name: KC_HOSTNAME, value: "https://$(HUB_DOMAIN)/auth" }
+            - { name: KC_PROXY_HEADERS, value: xforwarded }
+            - { name: KC_HEALTH_ENABLED, value: "true" }
+            - { name: KC_BOOTSTRAP_ADMIN_USERNAME, value: admin }
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: hub-secrets, key: KEYCLOAK_ADMIN_PASSWORD } }
+            # Se sustituye dentro de realm-compras.json al importarlo.
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: hub-secrets, key: OAUTH2_PROXY_CLIENT_SECRET } }
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: management
+              containerPort: 9000
+          readinessProbe:
+            httpGet:
+              path: /auth/health/ready
+              port: management
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: realm
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: realm
+          configMap:
+            name: keycloak-realm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+spec:
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

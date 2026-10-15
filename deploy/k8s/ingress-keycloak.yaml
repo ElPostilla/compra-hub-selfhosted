@@ -1,0 +1,27 @@
+# Keycloak incluido (k8s/keycloak.yaml) en /auth. Quitalo junto con
+# keycloak.yaml si usas otro Keycloak.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: compra-hub-keycloak
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # quitalo si no usas cert-manager
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hub.example.com  # lo sustituye kustomize con HUB_DOMAIN (config.env)
+      secretName: compra-hub-tls
+  rules:
+    - host: hub.example.com
+      http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080

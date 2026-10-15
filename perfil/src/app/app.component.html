@@ -1,0 +1,25 @@
+<div class="page">
+  <header>
+    <div class="top-links">
+      <div class="top-links-left">
+        <a class="app-home-link" href="/" aria-label="Inicio"><app-icon name="home"></app-icon></a>
+        <button type="button" class="app-nav-toggle" aria-label="Otras apps" (click)="navDrawer.open()"><app-icon name="menu"></app-icon></button>
+      </div>
+      <app-profile-menu></app-profile-menu>
+    </div>
+    <h1>Perfil</h1>
+    <p>Tu cuenta del hub.</p>
+  </header>
+
+  <main>
+    <div class="status" [class.visible]="status.visible()" [class.error]="status.kind() === 'error'" [class.ok]="status.kind() === 'ok'">
+      {{ status.message() }}
+    </div>
+
+    <app-profile-card (loaded)="onProfileLoaded($event)"></app-profile-card>
+    <app-privacy-card [profile]="profile()"></app-privacy-card>
+  </main>
+</div>
+
+<app-nav-drawer #navDrawer></app-nav-drawer>
+<app-asistente app="perfil" [view]="assistantView()" (changed)="onAssistantChanged()"></app-asistente>

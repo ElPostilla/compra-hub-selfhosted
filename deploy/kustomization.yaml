@@ -1,0 +1,65 @@
+# Despliegue en Kubernetes:   kubectl apply -k deploy/
+#
+# Antes: edita k8s/config.env (dominio y Keycloak) y crea k8s/secrets.env
+# (sh scripts/generar-secretos.sh k8s). Ver README, «Kubernetes».
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: compra-hub
+
+resources:
+  - k8s/namespace.yaml
+  - k8s/postgres.yaml
+  - k8s/oauth2-proxy.yaml
+  - k8s/apis.yaml
+  - k8s/web.yaml
+  - k8s/ingress.yaml
+  # Keycloak incluido. Si usas uno que ya tienes, quita estas dos lineas.
+  - k8s/keycloak.yaml
+  - k8s/ingress-keycloak.yaml
+  # Opcional: servidor MCP accesible desde fuera del cluster (ver README).
+  # - k8s/ingress-mcp.yaml
+
+configMapGenerator:
+  - name: hub-config
+    envs: [k8s/config.env]
+  - name: postgres-init
+    files: [postgres/init-multi-db.sh]
+  - name: keycloak-realm
+    files: [keycloak/realm-compras.json]
+
+secretGenerator:
+  - name: hub-secrets
+    envs: [k8s/secrets.env]
+
+# El dominio de config.env (HUB_DOMAIN) se copia a los Ingress.
+replacements:
+  - source:
+      kind: ConfigMap
+      name: hub-config
+      fieldPath: data.HUB_DOMAIN
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.tls.0.hosts.0
+          - spec.rules.0.host
+
+# Imagenes: por defecto las locales de scripts/build-images.sh
+# (compra-hub/<app>:latest). Si las subes a un registro, cambia newName/newTag
+# (p.ej. con `kustomize edit set image compra-hub/inicio=registry.example.com/hub/inicio:1.0`).
+images:
+  - { name: compra-hub/inicio, newName: compra-hub/inicio, newTag: latest }
+  - { name: compra-hub/lista-compra, newName: compra-hub/lista-compra, newTag: latest }
+  - { name: compra-hub/calendario, newName: compra-hub/calendario, newTag: latest }
+  - { name: compra-hub/todo, newName: compra-hub/todo, newTag: latest }
+  - { name: compra-hub/gastos, newName: compra-hub/gastos, newTag: latest }
+  - { name: compra-hub/menu, newName: compra-hub/menu, newTag: latest }
+  - { name: compra-hub/perfil, newName: compra-hub/perfil, newTag: latest }
+  - { name: compra-hub/grupos, newName: compra-hub/grupos, newTag: latest }
+  - { name: compra-hub/lista-compra-api, newName: compra-hub/lista-compra-api, newTag: latest }
+  - { name: compra-hub/calendario-api, newName: compra-hub/calendario-api, newTag: latest }
+  - { name: compra-hub/todo-api, newName: compra-hub/todo-api, newTag: latest }
+  - { name: compra-hub/gastos-api, newName: compra-hub/gastos-api, newTag: latest }
+  - { name: compra-hub/menu-api, newName: compra-hub/menu-api, newTag: latest }
+  - { name: compra-hub/asistente-api, newName: compra-hub/asistente-api, newTag: latest }
+  - { name: compra-hub/hub-mcp, newName: compra-hub/hub-mcp, newTag: latest }

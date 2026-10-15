@@ -1,0 +1,8 @@
+# Configuracion con secretos: nunca a git
+.env
+deploy/k8s/secrets.env
+
+node_modules/
+dist/
+.angular/
+*.log

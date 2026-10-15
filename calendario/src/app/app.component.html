@@ -1,0 +1,111 @@
+<div class="page">
+  <!-- Solo visible en pantallas anchas (ver @media en styles.css) -- en
+       movil la unica forma de cambiar de calendario sigue siendo el boton
+       del header + app-calendars-dialog, sin tocar ese flujo ya probado. -->
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Tus calendarios</h2>
+    <div class="sidebar-label">Personal</div>
+    <ul class="sidebar-list">
+      <li>
+        <button type="button" [class.active]="state.viewMode() === 'personal'" (click)="state.switchToPersonal()">
+          Mi calendario
+        </button>
+      </li>
+    </ul>
+    @if (state.groupLists().length) {
+      <div class="sidebar-label">Grupos compartidos</div>
+      <ul class="sidebar-list">
+        @for (g of state.groupLists(); track g.id) {
+          <li>
+            <button
+              type="button"
+              [class.active]="state.viewMode() === 'group' && state.currentGroupId() === g.id"
+              (click)="state.switchToGroup(g.id)"
+            >
+              {{ g.name }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </aside>
+
+  <div class="app">
+  <header>
+    <div class="top-links">
+      <div class="top-links-left">
+        <a class="app-home-link" href="/" aria-label="Inicio"><app-icon name="home"></app-icon></a>
+        <button type="button" class="app-nav-toggle" aria-label="Otras apps" (click)="navDrawer.open()"><app-icon name="menu"></app-icon></button>
+      </div>
+      <app-profile-menu></app-profile-menu>
+    </div>
+    <button type="button" class="calendar-switch" aria-haspopup="dialog" (click)="openCalendarsDialog()">
+      <h1>{{ state.calendarName() }}</h1>
+      @if (state.viewMode() === 'group') {
+        <span class="shared-badge">Grupo</span>
+      }
+      <span class="chevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="month-nav">
+      <span class="month-label">{{ monthLabel() }}</span>
+      <button type="button" class="today-btn" (click)="today()">Hoy</button>
+      <button type="button" class="nav-btn" aria-label="Mes anterior" (click)="prevMonth()"><span aria-hidden="true">‹</span></button>
+      <button type="button" class="nav-btn" aria-label="Mes siguiente" (click)="nextMonth()"><span aria-hidden="true">›</span></button>
+    </div>
+  </header>
+
+  @if (state.viewMode() === 'personal' && !state.connected()) {
+    <div class="connect-banner">
+      <span>Conecta tu Google Calendar para ver aquí también sus eventos.</span>
+      <button type="button" class="btn-secondary" (click)="connectGoogle()">Conectar Google Calendar</button>
+    </div>
+  }
+
+  <div class="weekdays">
+    @for (w of weekdayLabels; track w) {
+      <span>{{ w }}</span>
+    }
+  </div>
+  <div class="grid">
+    @for (day of days(); track day.key) {
+      <button
+        type="button"
+        class="day-cell"
+        [class.other-month]="day.otherMonth"
+        [class.today]="day.today"
+        (click)="openDay(day.key)"
+      >
+        <span>{{ day.dayNum }}</span>
+        @if (day.dots.length) {
+          <span class="day-dots">
+            @for (dot of day.dots; track dot) {
+              <span class="day-dot"></span>
+            }
+          </span>
+        }
+        @if (day.noteImportances.length) {
+          <span class="day-note-dots">
+            @for (imp of day.noteImportances; track imp) {
+              <span class="day-note-dot" [class]="imp"></span>
+            }
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  <div class="legend">
+    <span><i class="baja"></i> Baja</span>
+    <span><i class="media"></i> Media</span>
+    <span><i class="alta"></i> Alta</span>
+    <span><i class="google"></i> Evento de Google</span>
+  </div>
+
+  <div class="toast" [class.visible]="toast.visible()">{{ toast.message() }}</div>
+  </div>
+</div>
+
+<app-calendars-dialog></app-calendars-dialog>
+<app-day-dialog></app-day-dialog>
+<app-nav-drawer #navDrawer></app-nav-drawer>
+<app-asistente app="calendario" [view]="assistantView()" (changed)="onAssistantChanged()"></app-asistente>

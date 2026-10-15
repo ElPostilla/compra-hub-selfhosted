@@ -1,0 +1,81 @@
+# Postgres compartido: una base y un usuario por API (y para Keycloak), los
+# crea postgres/init-multi-db.sh la primera vez que arranca con el volumen
+# vacio.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-data
+spec:
+  accessModes: [ReadWriteOnce]
+  # storageClassName: local-path   # descomenta si tu cluster no tiene una por defecto
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate  # volumen ReadWriteOnce: nunca dos pods a la vez
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+            - { name: POSTGRES_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: POSTGRES_PASSWORD } } }
+            - { name: LISTA_COMPRA_DB_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: LISTA_COMPRA_DB_PASSWORD } } }
+            - { name: CALENDARIO_DB_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: CALENDARIO_DB_PASSWORD } } }
+            - { name: TODO_DB_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: TODO_DB_PASSWORD } } }
+            - { name: GASTOS_DB_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: GASTOS_DB_PASSWORD } } }
+            - { name: MENU_DB_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: MENU_DB_PASSWORD } } }
+            - { name: KEYCLOAK_DB_PASSWORD, valueFrom: { secretKeyRef: { name: hub-secrets, key: KEYCLOAK_DB_PASSWORD, optional: true } } }
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              cpu: 100m
+              memory: 160Mi
+            limits:
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
+        - name: init
+          configMap:
+            name: postgres-init
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

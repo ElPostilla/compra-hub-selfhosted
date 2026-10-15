@@ -1,0 +1,442 @@
+# Las 7 APIs del hub (Node + Express). Todas leen la configuracion comun
+# del ConfigMap hub-config (OIDC_ISSUER, OLLAMA_URL...) y su contraseña de
+# Postgres del Secret hub-secrets (ver ../kustomization.yaml).
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lista-compra-api
+  labels:
+    app: lista-compra-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lista-compra-api
+  template:
+    metadata:
+      labels:
+        app: lista-compra-api
+    spec:
+      containers:
+        - name: lista-compra-api
+          image: compra-hub/lista-compra-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGDATABASE
+              value: lista_compra
+            - name: PGUSER
+              value: lista_compra
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: LISTA_COMPRA_DB_PASSWORD
+            - name: VAPID_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: VAPID_PUBLIC_KEY
+                  optional: true
+            - name: VAPID_PRIVATE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: VAPID_PRIVATE_KEY
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lista-compra-api
+spec:
+  selector:
+    app: lista-compra-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: calendario-api
+  labels:
+    app: calendario-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: calendario-api
+  template:
+    metadata:
+      labels:
+        app: calendario-api
+    spec:
+      containers:
+        - name: calendario-api
+          image: compra-hub/calendario-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGDATABASE
+              value: calendario
+            - name: PGUSER
+              value: calendario
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: CALENDARIO_DB_PASSWORD
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: GOOGLE_CLIENT_ID
+                  optional: true
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: GOOGLE_CLIENT_SECRET
+                  optional: true
+            - name: GOOGLE_REDIRECT_URI
+              value: https://$(HUB_DOMAIN)/api-calendario/auth/callback
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calendario-api
+spec:
+  selector:
+    app: calendario-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-api
+  labels:
+    app: todo-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-api
+  template:
+    metadata:
+      labels:
+        app: todo-api
+    spec:
+      containers:
+        - name: todo-api
+          image: compra-hub/todo-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGDATABASE
+              value: todo
+            - name: PGUSER
+              value: todo
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: TODO_DB_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-api
+spec:
+  selector:
+    app: todo-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gastos-api
+  labels:
+    app: gastos-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gastos-api
+  template:
+    metadata:
+      labels:
+        app: gastos-api
+    spec:
+      containers:
+        - name: gastos-api
+          image: compra-hub/gastos-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGDATABASE
+              value: gastos
+            - name: PGUSER
+              value: gastos
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: GASTOS_DB_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gastos-api
+spec:
+  selector:
+    app: gastos-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: menu-api
+  labels:
+    app: menu-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: menu-api
+  template:
+    metadata:
+      labels:
+        app: menu-api
+    spec:
+      containers:
+        - name: menu-api
+          image: compra-hub/menu-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          env:
+            - name: PGHOST
+              value: postgres
+            - name: PGDATABASE
+              value: menu
+            - name: PGUSER
+              value: menu
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hub-secrets
+                  key: MENU_DB_PASSWORD
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: menu-api
+spec:
+  selector:
+    app: menu-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-mcp
+  labels:
+    app: hub-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hub-mcp
+  template:
+    metadata:
+      labels:
+        app: hub-mcp
+    spec:
+      containers:
+        - name: hub-mcp
+          image: compra-hub/hub-mcp:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-mcp
+spec:
+  selector:
+    app: hub-mcp
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asistente-api
+  labels:
+    app: asistente-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: asistente-api
+  template:
+    metadata:
+      labels:
+        app: asistente-api
+    spec:
+      containers:
+        - name: asistente-api
+          image: compra-hub/asistente-api:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: hub-config
+          env:
+            - name: HUB_MCP_URL
+              value: http://hub-mcp:3000/mcp
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 20m
+              memory: 64Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asistente-api
+spec:
+  selector:
+    app: asistente-api
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http

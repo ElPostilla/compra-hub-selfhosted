@@ -1,0 +1,303 @@
+/* Gastos: la libreta de cuentas de casa. La base (papel, tinta, cabecera,
+   controles, menu, dialogos, escritorio) vive en hub-theme.css, comun a
+   todo el hub. Aqui solo lo propio de esta app. Global a proposito: lo
+   comparten los dialogos (presupuesto, historico, grupos). */
+@import './hub-theme.css';
+
+:root {
+  --tab: var(--tab-gastos);
+  /* Categorias: tintas apagadas del mismo cuaderno. */
+  --cat-comida: #d9a53a;
+  --cat-casa: #5f9fd6;
+  --cat-ocio: #9384d3;
+  --cat-transporte: #3f9a8f;
+  --cat-salud: #d7708b;
+  --cat-otros: var(--ink-faint);
+}
+:root[data-theme='dark'] {
+  --cat-comida: #d6a93f;
+  --cat-casa: #6aa8dd;
+  --cat-ocio: #a193dc;
+  --cat-transporte: #57b3a7;
+  --cat-salud: #db7f98;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --cat-comida: #d6a93f;
+    --cat-casa: #6aa8dd;
+    --cat-ocio: #a193dc;
+    --cat-transporte: #57b3a7;
+    --cat-salud: #db7f98;
+  }
+}
+
+/* ------------------------------------------------------------ resumen */
+
+.summary {
+  padding: 1rem 1.1rem 1.1rem;
+  border-bottom: 1.5px solid var(--rule);
+}
+/* El total del mes: la cifra protagonista, a rotulador. */
+.month-total { display: flex; flex-direction: column; }
+.month-total span { color: var(--ink-soft); font-size: 0.95rem; font-weight: 600; }
+.month-total strong {
+  font-variation-settings: 'CASL' 1;
+  font-size: clamp(2.4rem, 11vw, 3rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.balances { display: flex; flex-direction: column; }
+.balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 44px;
+  border-bottom: 1px solid var(--rule);
+}
+.balance-identity { display: inline-flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.balance-name { font-weight: 600; }
+.balance-amount { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-weight: 600; }
+.balance-amount.positive { color: var(--green); }
+.balance-amount.negative { color: var(--red); }
+
+.category-breakdown { display: flex; flex-direction: column; gap: 0.55rem; margin-top: 1rem; }
+.category-row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, auto) 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+}
+.category-label { display: inline-flex; align-items: center; gap: 0.4rem; }
+.category-label app-icon { color: var(--ink-soft); }
+/* Barra de gasto: un trazo de rotulador del color de la categoria. */
+.category-bar-track { height: 8px; border-radius: 4px; background: var(--paper-2); overflow: hidden; }
+.category-bar-fill { height: 100%; border-radius: 4px; background: var(--cat-otros); transition: width 0.3s ease; }
+.category-bar-fill[data-cat='comida'] { background: var(--cat-comida); }
+.category-bar-fill[data-cat='casa'] { background: var(--cat-casa); }
+.category-bar-fill[data-cat='ocio'] { background: var(--cat-ocio); }
+.category-bar-fill[data-cat='transporte'] { background: var(--cat-transporte); }
+.category-bar-fill[data-cat='salud'] { background: var(--cat-salud); }
+.category-bar-fill.over-budget { background: var(--red); }
+.category-amount { color: var(--ink-soft); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.over-budget-text { color: var(--red); font-weight: 650; }
+
+.header-links { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin-top: 0.9rem; }
+.budgets-link {
+  min-height: 36px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--pen);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ------------------------------------------------------------ añadir */
+
+.quick-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem 0.75rem;
+}
+.quick-add input[type='text']:first-child { flex: 1 1 100%; min-width: 0; }
+.quick-add .amount-input { flex: 1 1 7rem; min-width: 0; font-variant-numeric: tabular-nums; text-align: right; }
+.quick-add .category-select { flex: 1 1 8rem; min-width: 0; }
+.quick-add .due-input { flex: 1 1 9rem; min-width: 0; }
+.recurrence-check {
+  flex: 1 1 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--tap);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+.quick-add .add-btn { flex: 0 0 var(--tap); }
+.add-btn app-icon { font-size: 1.35rem; }
+/* En movil: importe + categoria + boton en una fila, fecha y "repetir"
+   debajo (el boton no se queda solo en su propia fila). */
+.quick-add .add-btn { order: 2; }
+.quick-add .due-input, .quick-add .recurrence-check { order: 3; }
+
+/* Reparto en grupo: resumen plegable (quien pago, entre quien) para no
+   alargar el formulario en movil cuando se reparte entre todos. */
+.quick-add .split { order: 4; flex: 1 1 100%; min-width: 0; }
+.split-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 36px;
+  padding: 0.2rem 0.7rem;
+  border: 1.5px dashed var(--rule);
+  border-radius: var(--r-m);
+  background: none;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.split-toggle .chevron { color: var(--ink-faint); }
+.split-fields { display: flex; flex-direction: column; gap: 0.5rem; padding-top: 0.6rem; }
+.split-payer { display: flex; align-items: center; gap: 0.6rem; }
+.split-payer select { flex: 1 1 auto; min-width: 0; max-width: 16rem; }
+.split-label { color: var(--ink-soft); font-size: 0.9rem; font-weight: 600; }
+.member-chips, .share-chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.member-chip, .share-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 36px;
+  padding: 0.2rem 0.65rem 0.2rem 0.35rem;
+  border: 1.5px solid var(--rule);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.member-chip.on { border-color: var(--pen); background: var(--pen-soft); color: var(--ink); }
+.member-chip app-icon { color: var(--pen); }
+.split-preview { margin: 0; color: var(--ink-soft); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+
+/* Quien debe en cada gasto: una ficha por persona, se toca al cobrar. */
+/* Fila propia bajo el gasto (a todo lo ancho, alineada con el texto): en
+   la columna de la descripcion no caben en movil y pisaban el importe. */
+.expense-row:has(.share-chips) { flex-wrap: wrap; row-gap: 0.15rem; padding-bottom: 0.6rem; }
+.share-chips { flex: 1 1 100%; margin-left: calc(36px + 0.75rem); }
+.share-chip { white-space: nowrap; }
+.share-chip { min-height: 32px; font-size: 0.82rem; border-color: color-mix(in srgb, var(--red) 45%, var(--rule)); }
+.share-amount { font-variant-numeric: tabular-nums; color: var(--ink); }
+.share-state { color: var(--red); font-weight: 650; }
+.share-chip.settled { border-color: color-mix(in srgb, var(--green) 45%, var(--rule)); background: var(--green-soft); }
+.share-chip.settled .share-amount { text-decoration: line-through; color: var(--ink-soft); }
+.share-chip.settled .share-state, .share-chip.settled app-icon { color: var(--green); }
+
+/* Resumen de grupo: deudas persona a persona. */
+.debts { margin-top: 0.9rem; }
+.debts-title { margin: 0 0 0.3rem; font-size: 0.95rem; font-weight: 650; color: var(--ink-soft); }
+.debts-list { list-style: none; margin: 0; padding: 0; }
+.debt-row { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 40px; border-bottom: 1px dashed var(--rule); }
+.debt-who { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; font-weight: 600; font-size: 0.92rem; min-width: 0; }
+.debt-arrow { color: var(--ink-soft); font-weight: 500; }
+.debt-amount { color: var(--red); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.debts-clear { display: inline-flex; align-items: center; gap: 0.35rem; margin: 0; color: var(--green); font-weight: 600; }
+
+/* ------------------------------------------------------------ lista */
+
+.expense-list { list-style: none; margin: 0; padding: 0.25rem 0 2rem; }
+.expense-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 60px;
+  padding: 0.4rem 0.6rem 0.4rem 1.1rem;
+  border-bottom: 1px solid var(--rule);
+}
+/* Icono de categoria con una pestaña de su color. */
+.expense-cat-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-m);
+  background: color-mix(in srgb, var(--cat-otros) 18%, var(--paper));
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+.expense-cat-icon[data-cat='comida'] { background: color-mix(in srgb, var(--cat-comida) 24%, var(--paper)); }
+.expense-cat-icon[data-cat='casa'] { background: color-mix(in srgb, var(--cat-casa) 24%, var(--paper)); }
+.expense-cat-icon[data-cat='ocio'] { background: color-mix(in srgb, var(--cat-ocio) 24%, var(--paper)); }
+.expense-cat-icon[data-cat='transporte'] { background: color-mix(in srgb, var(--cat-transporte) 24%, var(--paper)); }
+.expense-cat-icon[data-cat='salud'] { background: color-mix(in srgb, var(--cat-salud) 24%, var(--paper)); }
+.expense-info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.expense-desc { font-size: 1.03rem; font-weight: 600; overflow-wrap: anywhere; }
+.recurrence-icon { display: inline-flex; margin-left: 0.2rem; color: var(--ink-soft); vertical-align: -0.1em; }
+.expense-meta { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; color: var(--ink-soft); font-size: 0.85rem; }
+.expense-paidby { display: inline-flex; align-items: center; gap: 0.25rem; }
+/* Importe: columna de cifras alineadas, como en un libro de cuentas. */
+.expense-amount {
+  flex: 0 0 auto;
+  font-size: 1.08rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.expense-del {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-m);
+  background: none;
+  color: var(--ink-faint);
+  font-size: 1.05rem;
+}
+.expense-del:hover { color: var(--red); background: var(--red-soft); }
+
+/* ------------------------------------------------------------ dialogos */
+
+.budgets-hint { margin: -0.4rem 0 0.75rem; color: var(--ink-soft); font-size: 0.9rem; }
+.budgets-list li,
+.history-list li { display: flex; align-items: center; gap: 0.6rem; min-height: 50px; border-bottom: 1px solid var(--rule); }
+.budget-cat-label { flex: 1 1 auto; display: inline-flex; align-items: center; gap: 0.45rem; }
+.budget-cat-label app-icon { color: var(--ink-soft); }
+.budget-input { flex: 0 0 7.5rem; width: 7.5rem; text-align: right; font-variant-numeric: tabular-nums; }
+.budget-currency { flex: 0 0 auto; color: var(--ink-soft); }
+.history-month { flex: 0 0 6.5rem; text-transform: capitalize; }
+.history-bar-track { flex: 1 1 auto; height: 8px; border-radius: 4px; background: var(--paper-2); overflow: hidden; }
+.history-bar-fill { height: 100%; border-radius: 4px; background: var(--tab); }
+.history-amount { flex: 0 0 auto; min-width: 5.5rem; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* ------------------------------------------------------------ escritorio */
+
+@media (min-width: 900px) {
+  /* Hoja con dos columnas: gastos a la izquierda, resumen a la derecha. */
+  .app {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    grid-template-areas:
+      'header  header'
+      'form    summary'
+      'list    summary';
+    align-content: start;
+  }
+  header { grid-area: header; }
+  .summary {
+    grid-area: summary;
+    align-self: start;
+    position: sticky;
+    top: 1rem;
+    padding: 1.4rem 1.5rem;
+    border-bottom: none;
+    border-left: 1.5px solid var(--rule);
+  }
+  .quick-add { grid-area: form; padding: 1.25rem 1.5rem 0.75rem 2rem; }
+  .quick-add .add-btn, .quick-add .due-input, .quick-add .recurrence-check { order: 0; }
+  .expense-list-wrap { grid-area: list; }
+  .expense-row { padding-left: 2rem; padding-right: 1rem; }
+  .expense-row .expense-del { opacity: 0; }
+  .expense-row:hover .expense-del, .expense-row .expense-del:focus-visible { opacity: 1; }
+  .category-row { grid-template-columns: 1fr auto; row-gap: 0.2rem; }
+  .category-row .category-bar-track { grid-column: 1 / -1; grid-row: 2; }
+}
+
+/* Pantallas muy anchas: resumen mas ancho y gastos en dos columnas. */
+@media (min-width: 1400px) {
+  .app { grid-template-columns: minmax(0, 1fr) 360px; }
+  .expense-list { column-count: 2; column-gap: 0; column-rule: 1.5px dashed var(--rule); }
+  .expense-row { break-inside: avoid; }
+}

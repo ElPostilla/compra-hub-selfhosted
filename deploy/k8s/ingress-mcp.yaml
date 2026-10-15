@@ -1,0 +1,30 @@
+# Opcional: publica el servidor MCP en https://<HUB_DOMAIN>/mcp para clientes
+# MCP de fuera del cluster (Open WebUI en otra maquina...). Solo responde con
+# "Authorization: Bearer <token del realm>": lo comprueban oauth2-proxy y el
+# propio hub-mcp. Para activarlo, descomenta su linea en ../kustomization.yaml.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: compra-hub-mcp
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # quitalo si no usas cert-manager
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: compra-hub-keycloak-auth@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hub.example.com  # lo sustituye kustomize con HUB_DOMAIN (config.env)
+      secretName: compra-hub-tls
+  rules:
+    - host: hub.example.com
+      http:
+        paths:
+          - path: /mcp
+            pathType: Exact
+            backend:
+              service:
+                name: hub-mcp
+                port:
+                  number: 3000

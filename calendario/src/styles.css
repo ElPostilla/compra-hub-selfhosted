@@ -1,0 +1,292 @@
+/* Calendario. La base (papel, tinta, cabecera, controles, menu, dialogos,
+   escritorio) vive en hub-theme.css, comun a todo el hub. Aqui solo lo
+   propio de esta app. Global a proposito: lo comparten los dialogos. */
+@import './hub-theme.css';
+
+:root { --tab: var(--tab-calendario); }
+
+/* ------------------------------------------------------------ mes */
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+/* El mes, escrito a mano. */
+.month-label {
+  margin-right: auto;
+  font-variation-settings: 'CASL' 1;
+  font-size: clamp(1.15rem, 5.2vw, 1.45rem);
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.nav-btn span { transform: translateY(-2px); }
+.nav-btn:hover, .today-btn:hover { border-color: var(--ink-soft); }
+.today-btn {
+  min-height: var(--tap);
+  padding: 0 0.85rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 650;
+}
+
+/* ------------------------------------------------------------ aviso Google */
+
+.connect-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1rem;
+  margin: 1rem 1.1rem 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 4px solid var(--marker);
+  border-radius: 0 var(--r-s) var(--r-s) 0;
+  background: var(--paper-2);
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+.connect-banner span { flex: 1 1 14rem; }
+
+/* ------------------------------------------------------------ rejilla */
+
+.weekdays,
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin: 0 1.1rem;
+}
+.weekdays { margin-top: 1rem; }
+.weekdays span {
+  padding-bottom: 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-weight: 650;
+  padding-left: 0.4rem;
+}
+.grid {
+  border-top: 1.5px solid var(--rule);
+  border-left: 1.5px solid var(--rule);
+}
+/* Cada dia, una casilla trazada sobre la cuadricula. */
+.day-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 56px;
+  padding: 0.3rem 0.35rem;
+  border: none;
+  border-right: 1.5px solid var(--rule);
+  border-bottom: 1.5px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+}
+.day-cell:hover { background: color-mix(in srgb, var(--tab) 10%, transparent); }
+.day-cell:focus-visible { outline-offset: -3px; border-radius: 0; }
+.day-cell.other-month { color: var(--ink-faint); font-weight: 400; }
+/* Hoy: el numero marcado con fosforito. */
+.day-cell.today > span:first-child {
+  padding: 0 0.3rem;
+  margin-left: -0.15rem;
+  border-radius: 3px;
+  background: var(--marker);
+  color: var(--marker-ink);
+  font-weight: 800;
+}
+.day-dots,
+.day-note-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+/* Eventos de Google: puntos en tinta suave. */
+.day-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+}
+/* Recordatorios: rayitas del color de su importancia. */
+.day-note-dot {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--imp-media);
+}
+.day-note-dot.baja { background: var(--imp-baja); }
+.day-note-dot.media { background: var(--imp-media); }
+.day-note-dot.alta { background: var(--imp-alta); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  padding: 0.9rem 1.1rem 2rem;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+.legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.legend i { display: inline-block; width: 12px; height: 4px; border-radius: 2px; background: var(--imp-media); }
+.legend i.baja { background: var(--imp-baja); }
+.legend i.alta { background: var(--imp-alta); }
+.legend i.google { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-soft); }
+
+/* ------------------------------------------------------------ dialogo del dia */
+
+.field-label {
+  display: block;
+  margin: 1rem 0 0.35rem;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.no-events { margin: 0 0 0.5rem; color: var(--ink-faint); font-size: 0.95rem; }
+.day-events li,
+.day-notes li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 46px;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+.ev-time { flex: 0 0 auto; color: var(--ink-soft); font-size: 0.88rem; font-variant-numeric: tabular-nums; }
+.note-imp-dot {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--imp-media);
+}
+.note-imp-dot[data-imp='baja'] { background: var(--imp-baja); }
+.note-imp-dot[data-imp='alta'] { background: var(--imp-alta); }
+.note-row-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+.note-text { font-size: 1rem; overflow-wrap: anywhere; }
+.note-recurrence-badge { color: var(--ink-soft); font-size: 0.82rem; }
+.note-row-actions { flex: 0 0 auto; display: flex; gap: 0.25rem; }
+.virtual-hint { flex: 0 0 auto; color: var(--ink-faint); font-size: 0.82rem; font-style: italic; }
+.btn-sm {
+  min-height: 36px;
+  padding: 0 0.6rem;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-s);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.btn-sm:hover { border-color: var(--ink-soft); }
+.btn-sm.btn-danger:hover { border-color: var(--red); background: var(--red-soft); }
+
+.note-form textarea {
+  width: 100%;
+  min-height: 84px;
+  resize: vertical;
+  line-height: 1.45;
+}
+/* Importancia: tres botones con su color. */
+.importance-picker { display: flex; gap: 0.4rem; }
+.imp-btn {
+  flex: 1 1 0;
+  min-height: 40px;
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+}
+.imp-btn::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 0.4rem;
+  border-radius: 3px;
+  background: var(--imp-media);
+  vertical-align: 0;
+}
+.imp-btn[data-imp='baja']::before { background: var(--imp-baja); }
+.imp-btn[data-imp='alta']::before { background: var(--imp-alta); }
+.imp-btn.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.recurrence-select { width: 100%; }
+/* Hora y aviso, en una fila (dos columnas). */
+.time-remind { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 0.6rem; }
+.time-remind { margin-top: 0.6rem; }
+.time-remind input, .time-remind select { width: 100%; }
+/* Safari (iOS) pinta el input de hora vacio como una caja en blanco:
+   le damos tamaño fijo y un texto «Sin hora» encima mientras este vacio. */
+.time-wrap { position: relative; }
+.time-wrap input[type='time'] { display: block; -webkit-appearance: none; appearance: none; min-width: 0; text-align: left; }
+.time-wrap input[type='time']::-webkit-date-and-time-value { text-align: left; }
+.time-wrap input.empty { color: transparent; }
+.time-wrap input.empty::-webkit-datetime-edit { color: transparent; }
+.time-empty {
+  position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%);
+  color: var(--ink-soft); pointer-events: none;
+}
+.note-time { margin-right: 0.35rem; font-variant-numeric: tabular-nums; }
+.note-remind { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--pen); font-size: 0.82rem; }
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+.dialog-actions > div { display: flex; gap: 0.5rem; margin-left: auto; }
+/* Aqui "Cerrar" va en fila con "Añadir", no a todo el ancho. */
+.dialog-actions .close-dialog-btn { width: auto; min-height: var(--tap); margin: 0; padding: 0 0.9rem; }
+.save-btn {
+  min-height: var(--tap);
+  padding: 0 1.1rem;
+  border: none;
+  border-radius: var(--r-m);
+  background: var(--pen);
+  color: var(--on-pen);
+  font-weight: 650;
+}
+.save-btn:hover { background: var(--pen-strong); }
+
+/* ------------------------------------------------------------ escritorio */
+
+@media (min-width: 900px) {
+  .month-label { font-size: 1.8rem; }
+  .connect-banner { margin: 1.25rem 2rem 0; }
+  .weekdays, .grid { margin: 0 2rem; }
+  .weekdays { margin-top: 1.25rem; }
+  .day-cell { min-height: 84px; font-size: 1.05rem; }
+  .legend { padding: 1rem 2rem 0; }
+}
+
+/* La rejilla del mes crece con la pantalla: casillas mas altas para que
+   el mes llene la hoja. */
+@media (min-width: 900px) {
+  .day-cell { min-height: max(84px, calc((100dvh - 470px) / 6)); }
+}

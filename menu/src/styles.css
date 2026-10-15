@@ -1,0 +1,151 @@
+/* Menu semanal. La base (papel, tinta, cabecera, controles, menu,
+   dialogos, escritorio) vive en hub-theme.css, comun a todo el hub. Aqui
+   solo lo propio de esta app. */
+@import './hub-theme.css';
+
+:root { --tab: var(--tab-menu); }
+
+/* ------------------------------------------------------------ semana */
+
+.week-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+.week-label {
+  margin-right: auto;
+  font-variation-settings: 'CASL' 1;
+  font-size: clamp(1.1rem, 5vw, 1.4rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+/* En movil la semana va en su linea y los botones debajo. */
+@media (max-width: 480px) {
+  .week-label { flex: 1 0 100%; }
+  .today-btn { margin-right: auto; }
+}
+.nav-btn,
+.today-btn {
+  min-height: var(--tap);
+  border: 1.5px solid var(--rule);
+  border-radius: var(--r-m);
+  background: var(--paper);
+  color: var(--ink);
+}
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  padding: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.nav-btn span { transform: translateY(-2px); }
+.today-btn { padding: 0 0.8rem; font-weight: 650; white-space: nowrap; }
+.nav-btn:hover, .today-btn:hover { border-color: var(--ink-soft); }
+.send-week-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  margin-top: 0.8rem;
+  padding: 0 0.85rem;
+  border: none;
+  border-radius: var(--r-m);
+  background: var(--pen-soft);
+  color: var(--pen-strong);
+  font-weight: 650;
+}
+.send-week-btn:hover { background: color-mix(in srgb, var(--pen) 22%, var(--paper)); }
+
+/* ------------------------------------------------------------ dias */
+
+.week-grid { padding: 0.25rem 0 2rem; }
+.day-row {
+  padding: 0.85rem 1.1rem 0.6rem;
+  border-bottom: 1.5px solid var(--rule);
+}
+.day-label {
+  display: inline-block;
+  margin-bottom: 0.2rem;
+  font-variation-settings: 'CASL' 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+/* Hoy: el dia marcado con fosforito. */
+.day-row.today .day-label {
+  padding: 0 0.35rem;
+  margin-left: -0.35rem;
+  border-radius: 3px;
+  background: var(--marker);
+  color: var(--marker-ink);
+}
+.day-slots { display: flex; flex-direction: column; gap: 0.1rem; }
+.slot-cell { min-width: 0; }
+.slot-cell-main { display: flex; align-items: baseline; gap: 0.6rem; }
+.slot-label { flex: 0 0 3.6rem; color: var(--ink-soft); font-size: 0.9rem; font-weight: 600; }
+/* Se escribe sobre la linea, como rellenar un hueco a boli. */
+/* input.* para ganar en especificidad a input[type='text'] del tema. */
+input.meal-input,
+input.ingredients-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 42px;
+  padding: 0.3rem 0.1rem;
+  border: none;
+  border-bottom: 1.5px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  font-size: 1.05rem;
+}
+input.meal-input:focus-visible,
+input.ingredients-input:focus-visible {
+  border-bottom-color: var(--pen);
+  box-shadow: 0 2px 0 var(--pen);
+}
+input.meal-input:not(:placeholder-shown) { font-weight: 600; }
+.ingredients-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding-left: 4.2rem;
+}
+input.ingredients-input { min-height: 36px; color: var(--ink-soft); font-size: 0.9rem; border-bottom-style: dashed; }
+.send-list-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-m);
+  background: none;
+  color: var(--pen);
+  font-size: 1.1rem;
+}
+.send-list-btn:hover { background: var(--pen-soft); }
+
+/* ------------------------------------------------------------ escritorio */
+
+/* Agenda semanal: dia | comida | cena, una fila por dia. */
+@media (min-width: 900px) {
+  .week-label { font-size: 1.7rem; }
+  .day-row {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    align-items: start;
+    column-gap: 1rem;
+    padding: 0.8rem 2rem 0.6rem;
+  }
+  .day-label { margin-top: 0.45rem; }
+  .day-slots { flex-direction: row; gap: 1.5rem; }
+  .slot-cell { flex: 1 1 0; }
+  .slot-label { flex-basis: 3.2rem; }
+  .ingredients-row { padding-left: 3.8rem; }
+}

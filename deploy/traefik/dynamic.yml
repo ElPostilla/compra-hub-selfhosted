@@ -1,0 +1,118 @@
+# Rutas del hub para Docker Compose (Traefik, proveedor de ficheros).
+# Equivale a los Ingress + Middlewares de deploy/k8s/. El dominio sale de
+# la variable de entorno HUB_DOMAIN del contenedor de Traefik (plantillas Go
+# de Traefik: {{ env "HUB_DOMAIN" }}).
+#
+# Todo lo que no sea /auth (Keycloak), /oauth2 (login) o las paginas
+# legales pasa por el middleware keycloak-auth: sin sesion, oauth2-proxy
+# redirige al login de Keycloak.
+{{ $domain := env "HUB_DOMAIN" }}
+{{ $resolver := env "TLS_CERT_RESOLVER" }}
+http:
+  middlewares:
+    # forwardAuth en modo "static upstream": se apunta a la raiz "/" de
+    # oauth2-proxy (no a /oauth2/auth) para que una peticion sin sesion
+    # reciba directamente la redireccion al login en vez de un 401.
+    keycloak-auth:
+      forwardAuth:
+        address: http://oauth2-proxy:4180/
+        trustForwardHeader: true
+        addAuthCookiesToResponse:
+          - _oauth2_proxy_compras
+        authResponseHeaders:
+          - X-Auth-Request-User
+          - X-Auth-Request-Email
+          - X-Auth-Request-Preferred-Username
+          # JWT firmado por Keycloak: cada API lo verifica contra el JWKS
+          # del realm (auth.js) en vez de fiarse de X-Auth-Request-User.
+          - X-Auth-Request-Access-Token
+        authRequestHeaders:
+          - X-Forwarded-Host
+          - X-Forwarded-Proto
+          - X-Forwarded-Uri
+          - X-Real-Ip
+          - Cookie
+          # Clientes sin navegador con "Authorization: Bearer <JWT>".
+          - Authorization
+    # Quita /lista, /todo... antes de pasar la peticion al nginx de cada
+    # app (cada una sirve sus ficheros desde la raiz).
+    strip-app-prefix:
+      stripPrefix:
+        prefixes:
+          - /lista
+          - /calendario
+          - /perfil
+          - /todo
+          - /gastos
+          - /menu
+          - /grupos
+
+  routers:
+    keycloak:
+      rule: Host(`{{ $domain }}`) && PathPrefix(`/auth`)
+      entryPoints: [websecure]
+      service: keycloak
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+    oauth2:
+      rule: Host(`{{ $domain }}`) && PathPrefix(`/oauth2`)
+      entryPoints: [websecure]
+      service: oauth2-proxy
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+    # Paginas legales: se tienen que poder leer sin sesion.
+    legal:
+      rule: Host(`{{ $domain }}`) && (PathPrefix(`/legal/`) || PathPrefix(`/fonts/`) || Path(`/robots.txt`))
+      entryPoints: [websecure]
+      service: inicio
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+{{ range $path, $svc := dict "/api/" "lista-compra-api" "/api-calendario" "calendario-api" "/api-todo" "todo-api" "/api-gastos" "gastos-api" "/api-menu" "menu-api" "/api-asistente" "asistente-api" }}
+    {{ $svc }}:
+      rule: Host(`{{ $domain }}`) && PathPrefix(`{{ $path }}`)
+      entryPoints: [websecure]
+      middlewares: [keycloak-auth]
+      service: {{ $svc }}
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+{{ end }}
+{{ range $path, $svc := dict "/lista" "lista-compra" "/calendario" "calendario" "/perfil" "perfil" "/todo" "todo" "/gastos" "gastos" "/menu" "menu" "/grupos" "grupos" }}
+    {{ $svc }}:
+      rule: Host(`{{ $domain }}`) && PathPrefix(`{{ $path }}`)
+      entryPoints: [websecure]
+      middlewares: [keycloak-auth, strip-app-prefix]
+      service: {{ $svc }}
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+{{ end }}
+{{ if eq (env "HUB_MCP_PUBLIC") "true" }}
+    # Opcional (HUB_MCP_PUBLIC=true): servidor MCP para clientes externos
+    # (Open WebUI, etc.). Solo con "Authorization: Bearer <token del realm>";
+    # oauth2-proxy y el propio hub-mcp verifican el token.
+    hub-mcp:
+      rule: Host(`{{ $domain }}`) && Path(`/mcp`)
+      entryPoints: [websecure]
+      middlewares: [keycloak-auth]
+      service: hub-mcp
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+{{ end }}
+    inicio:
+      rule: Host(`{{ $domain }}`)
+      priority: 1
+      entryPoints: [websecure]
+      middlewares: [keycloak-auth]
+      service: inicio
+      tls: {{ if $resolver }}{ certResolver: {{ $resolver }} }{{ else }}{}{{ end }}
+
+  services:
+    keycloak:
+      loadBalancer:
+        servers: [{ url: "http://keycloak:8080" }]
+    oauth2-proxy:
+      loadBalancer:
+        servers: [{ url: "http://oauth2-proxy:4180" }]
+{{ range $svc := list "lista-compra-api" "calendario-api" "todo-api" "gastos-api" "menu-api" "asistente-api" "hub-mcp" }}
+    {{ $svc }}:
+      loadBalancer:
+        servers: [{ url: "http://{{ $svc }}:3000" }]
+{{ end }}
+{{ range $svc := list "inicio" "lista-compra" "calendario" "perfil" "todo" "gastos" "menu" "grupos" }}
+    {{ $svc }}:
+      loadBalancer:
+        servers: [{ url: "http://{{ $svc }}:80" }]
+{{ end }}

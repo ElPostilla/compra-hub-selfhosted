@@ -1,0 +1,208 @@
+# Requiere Traefik como Ingress controller (el de k3s por defecto): usa sus
+# Middlewares para el login. Con otro controller (p.ej. ingress-nginx)
+# tendrias que traducir keycloak-auth a sus anotaciones de auth externa
+# (nginx.ingress.kubernetes.io/auth-url / auth-signin / auth-response-headers).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: keycloak-auth
+spec:
+  # forwardAuth en modo "static upstream": apuntar a la raiz "/" de
+  # oauth2-proxy (no a /oauth2/auth) hace que una peticion sin sesion reciba
+  # directamente la redireccion al login en vez de un 401.
+  forwardAuth:
+    address: http://oauth2-proxy.compra-hub.svc.cluster.local:4180/
+    trustForwardHeader: true
+    addAuthCookiesToResponse:
+      - _oauth2_proxy_compras
+    authResponseHeaders:
+      - X-Auth-Request-User
+      - X-Auth-Request-Email
+      - X-Auth-Request-Preferred-Username
+      - X-Auth-Request-Access-Token  # JWT de Keycloak: cada API lo verifica contra el JWKS del realm
+    authRequestHeaders:
+      - X-Forwarded-Host
+      - X-Forwarded-Proto
+      - X-Forwarded-Uri
+      - X-Real-Ip
+      - Cookie
+      - Authorization  # clientes sin navegador con "Bearer <JWT>"
+---
+# Quita /lista, /todo... antes de pasar la peticion al nginx de cada app.
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-app-prefix
+spec:
+  stripPrefix:
+    prefixes: [/lista, /calendario, /perfil, /todo, /gastos, /menu, /grupos]
+---
+# Todo el hub, detras del login. Las rutas de API usan el prefijo "/api-"
+# para no chocar con el prefijo de su propia app.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: compra-hub
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # quitalo si no usas cert-manager
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: compra-hub-keycloak-auth@kubernetescrd,compra-hub-strip-app-prefix@kubernetescrd
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hub.example.com  # lo sustituye kustomize con HUB_DOMAIN (config.env)
+      secretName: compra-hub-tls
+  rules:
+    - host: hub.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: lista-compra-api
+                port:
+                  number: 3000
+          - path: /api-calendario
+            pathType: Prefix
+            backend:
+              service:
+                name: calendario-api
+                port:
+                  number: 3000
+          - path: /api-todo
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-api
+                port:
+                  number: 3000
+          - path: /api-gastos
+            pathType: Prefix
+            backend:
+              service:
+                name: gastos-api
+                port:
+                  number: 3000
+          - path: /api-menu
+            pathType: Prefix
+            backend:
+              service:
+                name: menu-api
+                port:
+                  number: 3000
+          - path: /api-asistente
+            pathType: Prefix
+            backend:
+              service:
+                name: asistente-api
+                port:
+                  number: 3000
+          - path: /lista
+            pathType: Prefix
+            backend:
+              service:
+                name: lista-compra
+                port:
+                  number: 80
+          - path: /calendario
+            pathType: Prefix
+            backend:
+              service:
+                name: calendario
+                port:
+                  number: 80
+          - path: /perfil
+            pathType: Prefix
+            backend:
+              service:
+                name: perfil
+                port:
+                  number: 80
+          - path: /todo
+            pathType: Prefix
+            backend:
+              service:
+                name: todo
+                port:
+                  number: 80
+          - path: /gastos
+            pathType: Prefix
+            backend:
+              service:
+                name: gastos
+                port:
+                  number: 80
+          - path: /menu
+            pathType: Prefix
+            backend:
+              service:
+                name: menu
+                port:
+                  number: 80
+          - path: /grupos
+            pathType: Prefix
+            backend:
+              service:
+                name: grupos
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: inicio
+                port:
+                  number: 80
+---
+# Rutas SIN login: el flujo de inicio de sesion (/oauth2), las paginas
+# legales (se leen antes de registrarse) y robots.txt. Van en un Ingress
+# aparte porque los middlewares se aplican a todo un Ingress, no por ruta.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: compra-hub-public
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod  # quitalo si no usas cert-manager
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - hub.example.com  # lo sustituye kustomize con HUB_DOMAIN (config.env)
+      secretName: compra-hub-tls
+  rules:
+    - host: hub.example.com
+      http:
+        paths:
+          - path: /oauth2
+            pathType: Prefix
+            backend:
+              service:
+                name: oauth2-proxy
+                port:
+                  number: 4180
+          - path: /legal/
+            pathType: Prefix
+            backend:
+              service:
+                name: inicio
+                port:
+                  number: 80
+          - path: /fonts/
+            pathType: Prefix
+            backend:
+              service:
+                name: inicio
+                port:
+                  number: 80
+          - path: /robots.txt
+            pathType: Exact
+            backend:
+              service:
+                name: inicio
+                port:
+                  number: 80

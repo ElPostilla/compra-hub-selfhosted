@@ -1,0 +1,294 @@
+/* Tareas. La base (papel, tinta, cabecera, controles, menu, dialogos,
+   escritorio) vive en hub-theme.css, comun a todo el hub. Aqui solo lo
+   propio de esta app. Global a proposito: lo comparten los componentes
+   hijos (lista, kanban, dialogo de tableros). */
+@import './hub-theme.css';
+
+:root {
+  --tab: var(--tab-tareas);
+  --doing: #b86a12;
+}
+:root[data-theme='dark'] { --doing: #f0a44a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) { --doing: #f0a44a; }
+}
+
+/* ------------------------------------------------------------ vista */
+
+/* Lista / Kanban: dos pestañas de cuaderno, la activa subrayada con el
+   color del separador. */
+.view-tabs {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.25rem;
+}
+.view-tab {
+  min-height: 40px;
+  padding: 0 0.1rem;
+  border: none;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.view-tab:hover { color: var(--ink); }
+.view-tab.active { color: var(--ink); border-bottom-color: var(--tab); }
+
+/* ------------------------------------------------------------ añadir */
+
+.quick-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 1rem 1.1rem 0.5rem;
+}
+.quick-add input[type='text'] { flex: 1 1 100%; min-width: 0; }
+.quick-add .due-input { flex: 1 1 9rem; min-width: 0; }
+.quick-add .recurrence-input { flex: 1 1 8rem; min-width: 0; }
+.quick-add .importance-input { flex: 1 1 9rem; min-width: 0; }
+.quick-add .add-btn { flex: 0 0 var(--tap); }
+.add-btn app-icon { font-size: 1.35rem; }
+
+/* ------------------------------------------------------------ lista */
+
+.task-list { list-style: none; margin: 0; padding: 0.25rem 0 2rem; }
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 54px;
+  padding: 0.35rem 0.6rem 0.35rem 0.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+.task-checkbox {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 2px solid var(--ink-soft);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--pen);
+  font-size: 1.05rem;
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+.task-checkbox:hover { border-color: var(--ink); }
+.task-checkbox:active { transform: scale(0.88); }
+.task-checkbox.checked { border-color: var(--pen); }
+/* Ancho de su texto: el tachado cubre la frase, no la fila. */
+.task-title {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-right: auto;
+  font-size: 1.03rem;
+  overflow-wrap: anywhere;
+}
+.doing-badge {
+  flex: 0 0 auto;
+  color: var(--doing);
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+.due-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.3rem;
+  border-radius: 3px;
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.due-badge app-icon { font-size: 0.95rem; }
+.due-badge.overdue { color: var(--red); font-weight: 650; }
+.task-del,
+.kanban-card-del {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-m);
+  background: none;
+  color: var(--ink-faint);
+  font-size: 1.1rem;
+}
+.task-del:hover,
+.kanban-card-del:hover { color: var(--red); background: var(--red-soft); }
+
+/* ------------------------------------------------------------ kanban */
+
+/* Tres columnas de cuaderno; en movil se deslizan de lado y encajan. */
+.kanban {
+  display: flex;
+  gap: 0;
+  padding: 1rem 0 2rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.kanban-col {
+  flex: 1 0 min(82vw, 260px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0 0.85rem;
+  border-right: 1.5px dashed var(--rule);
+  scroll-snap-align: start;
+}
+.kanban-col:last-child { border-right: none; }
+.kanban-col-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0 0.1rem 0.3rem;
+  border-bottom: 3px solid var(--tab);
+  font-variation-settings: 'CASL' 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.kanban-count { color: var(--ink-soft); font-size: 0.95rem; font-variation-settings: 'CASL' 0; font-variant-numeric: tabular-nums; }
+.kanban-cards { display: flex; flex-direction: column; gap: 0.55rem; min-height: 3rem; }
+/* Cada tarjeta, un papelito sobre la hoja. */
+.kanban-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.6rem 0.4rem 0.6rem 0.75rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-s);
+  background: var(--paper);
+  box-shadow: 0 1px 0 var(--rule);
+  cursor: grab;
+}
+.kanban-card:active { cursor: grabbing; }
+.kanban-card.dragging { opacity: 0.4; }
+.kanban-card-top { display: flex; align-items: flex-start; gap: 0.25rem; }
+.kanban-card-title { flex: 1 1 auto; min-width: 0; padding-top: 0.45rem; font-size: 0.98rem; overflow-wrap: anywhere; }
+.kanban-card-del { width: 34px; height: 34px; }
+.kanban-empty {
+  padding: 0.9rem;
+  border: 1.5px dashed var(--rule);
+  border-radius: var(--r-s);
+  color: var(--ink-faint);
+  font-size: 0.9rem;
+  text-align: center;
+}
+.kanban-add { display: flex; gap: 0.4rem; }
+.kanban-add input { flex: 1 1 auto; min-width: 0; }
+.kanban-add button {
+  flex: 0 0 var(--tap);
+  border: none;
+  border-radius: var(--r-m);
+  background: var(--pen);
+  color: var(--on-pen);
+  font-size: 1.25rem;
+}
+
+/* ------------------------------------------------------------ escritorio */
+
+@media (min-width: 900px) {
+  .quick-add { flex-wrap: nowrap; padding: 1.25rem 2rem 0.5rem; }
+  .quick-add input[type='text'] { flex: 1 1 auto; }
+  .quick-add .due-input { flex: 0 0 10rem; }
+  .quick-add .recurrence-input { flex: 0 0 9.5rem; }
+  .quick-add .importance-input { flex: 0 0 11rem; }
+  .task-row { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .task-row .task-del { opacity: 0; }
+  .task-row:hover .task-del, .task-row .task-del:focus-visible { opacity: 1; }
+  .kanban { padding: 1.25rem 1.25rem 2rem; overflow-x: visible; }
+  .kanban-col { flex: 1 1 0; min-width: 0; }
+}
+
+/* Pantallas muy anchas: la lista de tareas en dos columnas (exactamente
+   dos: con mas, pocas tareas quedaban repartidas y costaba seguir el orden). */
+@media (min-width: 1500px) {
+  .task-list { column-count: 2; column-gap: 0; column-rule: 1.5px dashed var(--rule); }
+  .task-row { break-inside: avoid; }
+}
+
+/* ------------------------------------------------------------ importancia y orden */
+
+/* Asa para arrastrar (lista y kanban). touch-action:none: el navegador no
+   convierte el gesto en scroll mientras se arrastra desde aqui. */
+.drag-handle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: var(--r-s);
+  background: none;
+  color: var(--ink-faint);
+  font-size: 1.15rem;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.drag-handle:hover { color: var(--ink); background: var(--paper-2); }
+.drag-handle:active { cursor: grabbing; }
+
+/* Importancia: la misma raya de color que las notas del calendario; al
+   tocarla cambia (baja -> media -> alta). */
+.imp-mark {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 14px;
+  margin: 0.4rem 0;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.imp-mark::before {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 100%;
+  margin: 0 auto;
+  border-radius: 3px;
+  background: var(--imp-media);
+}
+.imp-mark[data-imp='baja']::before { background: var(--imp-baja); }
+.imp-mark[data-imp='alta']::before { background: var(--imp-alta); }
+.imp-mark:hover::before { transform: scaleX(1.5); }
+
+/* Lo que se arrastra se «levanta»; la raya azul marca donde caera. */
+.task-row.dragging,
+.kanban-card.dragging {
+  position: relative;
+  z-index: 20;
+  background: var(--paper);
+  box-shadow: var(--pop-shadow);
+  border-radius: var(--r-s);
+}
+.task-row.drop-before { box-shadow: inset 0 3px 0 var(--pen); }
+.task-row.drop-after { box-shadow: inset 0 -3px 0 var(--pen); }
+.kanban-card.drop-before { box-shadow: 0 -3px 0 var(--pen); }
+.kanban-col.drop-end .kanban-cards { box-shadow: inset 0 -3px 0 var(--pen); }
+
+/* Kanban: la importancia como borde izquierdo de la tarjeta. */
+.kanban-card { border-left: 5px solid var(--imp-media); }
+.kanban-card[data-imp='baja'] { border-left-color: var(--imp-baja); }
+.kanban-card[data-imp='alta'] { border-left-color: var(--imp-alta); }
+.kanban-card-top { align-items: center; }
+.kanban-card .drag-handle { height: 34px; width: 24px; margin-left: -0.35rem; }
+.kanban-card-title { padding-top: 0; }
+.kanban-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding-left: 1.3rem; }
+.imp-label { color: var(--ink-soft); font-size: 0.82rem; }
+.imp-label[data-imp='alta'] { color: var(--red); font-weight: 650; }
+
+@media (prefers-reduced-motion: reduce) {
+  .imp-mark:hover::before { transform: none; }
+}

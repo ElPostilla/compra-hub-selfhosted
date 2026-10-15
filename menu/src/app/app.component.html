@@ -1,0 +1,115 @@
+<div class="page">
+  <!-- Solo visible en pantallas anchas (ver @media en styles.css) -- en
+       movil la unica forma de cambiar de cuenta sigue siendo el boton del
+       header + app-groups-dialog, sin tocar ese flujo ya probado. -->
+  <aside class="sidebar">
+    <h2 class="sidebar-title">Tus cuentas</h2>
+    <div class="sidebar-label">Personal</div>
+    <ul class="sidebar-list">
+      <li>
+        <button type="button" [class.active]="state.ownerMode() === 'personal'" (click)="state.switchToPersonal()">
+          Mi menú
+        </button>
+      </li>
+    </ul>
+    @if (state.groups().length) {
+      <div class="sidebar-label">Grupos compartidos</div>
+      <ul class="sidebar-list">
+        @for (g of state.groups(); track g.id) {
+          <li>
+            <button
+              type="button"
+              [class.active]="state.ownerMode() === 'group' && state.currentGroupId() === g.id"
+              (click)="state.switchToGroup(g.id)"
+            >
+              {{ g.name }}
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </aside>
+
+  <div class="app">
+  <header>
+    <div class="top-links">
+      <div class="top-links-left">
+        <a class="app-home-link" href="/" aria-label="Inicio"><app-icon name="home"></app-icon></a>
+        <button type="button" class="app-nav-toggle" aria-label="Otras apps" (click)="navDrawer.open()"><app-icon name="menu"></app-icon></button>
+      </div>
+      <app-profile-menu></app-profile-menu>
+    </div>
+    <button type="button" class="account-switch" aria-haspopup="dialog" (click)="openGroupsDialog()">
+      <h1>{{ state.menuName() }}</h1>
+      @if (state.ownerMode() === 'group') {
+        <span class="shared-badge">Grupo</span>
+      }
+      <span class="chevron" aria-hidden="true">⌄</span>
+    </button>
+    <div class="week-nav">
+      <span class="week-label">{{ weekRangeLabel() }}</span>
+      <button type="button" class="today-btn" (click)="state.goThisWeek()">Esta semana</button>
+      <button type="button" class="nav-btn" aria-label="Semana anterior" (click)="state.changeWeek(-1)"><span aria-hidden="true">‹</span></button>
+      <button type="button" class="nav-btn" aria-label="Semana siguiente" (click)="state.changeWeek(1)"><span aria-hidden="true">›</span></button>
+    </div>
+    @if (hasAnyIngredientsThisWeek()) {
+      <button type="button" class="send-week-btn" (click)="sendWeekToShoppingList()">
+        <app-icon name="cart"></app-icon> Añadir los ingredientes de la semana a la compra
+      </button>
+    }
+  </header>
+
+  <div class="week-grid">
+    @for (day of state.weekDays(); track dayKey(day)) {
+      <div class="day-row" [class.today]="isToday(day)">
+        <div class="day-label">{{ dayLabel(day) }}</div>
+        <div class="day-slots">
+          @for (slot of slots; track slot) {
+            <div class="slot-cell">
+              <div class="slot-cell-main">
+                <span class="slot-label">{{ slotLabels[slot] }}</span>
+                <input
+                  type="text"
+                  class="meal-input"
+                  [value]="cellValue(dayKey(day), slot)"
+                  (input)="onCellInput(dayKey(day), slot, $event)"
+                  (blur)="commitCell(dayKey(day), slot)"
+                  (keydown.enter)="blurCell($event)"
+                  placeholder="…"
+                />
+              </div>
+              @if (hasMeal(dayKey(day), slot)) {
+                <div class="ingredients-row">
+                  <input
+                    type="text"
+                    class="ingredients-input"
+                    [value]="ingredientsValue(dayKey(day), slot)"
+                    (input)="onIngredientsInput(dayKey(day), slot, $event)"
+                    (blur)="commitIngredients(dayKey(day), slot)"
+                    (keydown.enter)="blurCell($event)"
+                    placeholder="Ingredientes, separados por comas (opcional)"
+                  />
+                  @if (hasIngredients(dayKey(day), slot)) {
+                    <button
+                      type="button"
+                      class="send-list-btn"
+                      title="Añadir estos ingredientes a la compra" aria-label="Añadir estos ingredientes a la compra"
+                      (click)="sendToShoppingList(dayKey(day), slot)"
+                    ><app-icon name="cart"></app-icon></button>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="toast" [class.visible]="toast.visible()">{{ toast.message() }}</div>
+  </div>
+</div>
+
+<app-groups-dialog></app-groups-dialog>
+<app-nav-drawer #navDrawer></app-nav-drawer>
+<app-asistente app="menu" [view]="assistantView()" (changed)="onAssistantChanged()"></app-asistente>

@@ -1,0 +1,98 @@
+# oauth2-proxy en modo forwardAuth "static upstream": no hace de proxy de
+# nada (--upstream=static://202); Traefik sigue enrutando cada ruta a su
+# app y solo le pregunta a oauth2-proxy si hay sesion (Middleware
+# keycloak-auth en ingress.yaml). Tambien sirve /oauth2/start, /callback y
+# /sign_out.
+#
+# Necesita llegar a <OIDC_ISSUER> desde dentro del cluster. Si tu dominio
+# resuelve a la IP publica del router y este no hace NAT loopback, añade un
+# hostAliases con la IP del Service de tu Ingress controller (p.ej.
+# `kubectl -n kube-system get svc traefik`):
+#
+#   hostAliases:
+#     - ip: "10.43.x.y"
+#       hostnames: ["hub.example.com"]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth2-proxy
+  labels:
+    app: oauth2-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        app: oauth2-proxy
+    spec:
+      containers:
+        - name: oauth2-proxy
+          image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5
+          args:
+            - --provider=keycloak-oidc
+            - --client-id=compras
+            - --oidc-issuer-url=$(OIDC_ISSUER)
+            - --redirect-url=https://$(HUB_DOMAIN)/oauth2/callback
+            - --insecure-oidc-allow-unverified-email=true
+            - --upstream=static://202
+            - --reverse-proxy=true
+            - --http-address=0.0.0.0:4180
+            - --email-domain=*
+            - --cookie-expire=24h       # igual que la sesion SSO del realm (24 h)
+            - --cookie-refresh=2m       # el access token dura 5 min: se renueva antes
+            - --cookie-secure=true
+            - --cookie-samesite=lax
+            - --cookie-domain=$(HUB_DOMAIN)
+            - --cookie-name=_oauth2_proxy_compras
+            - --skip-provider-button=true
+            - --cookie-csrf-per-request=true  # varias peticiones en paralelo sin sesion no se pisan la cookie csrf
+            - --cookie-csrf-per-request-limit=10
+            - --silence-ping-logging=true
+            - --oidc-extra-audience=account
+            - --whitelist-domain=$(HUB_DOMAIN)
+            - --trusted-proxy-ip=0.0.0.0/0
+            - --code-challenge-method=S256
+            - --pass-authorization-header=true
+            - --set-xauthrequest=true
+            - --pass-access-token=true     # X-Auth-Request-Access-Token: el JWT que verifican las APIs
+            - --skip-jwt-bearer-tokens=true  # "Authorization: Bearer <JWT del realm>" tambien vale como sesion
+          env:
+            - name: HUB_DOMAIN
+              valueFrom: { configMapKeyRef: { name: hub-config, key: HUB_DOMAIN } }
+            - name: OIDC_ISSUER
+              valueFrom: { configMapKeyRef: { name: hub-config, key: OIDC_ISSUER } }
+            - name: OAUTH2_PROXY_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: hub-secrets, key: OAUTH2_PROXY_CLIENT_SECRET } }
+            - name: OAUTH2_PROXY_COOKIE_SECRET
+              valueFrom: { secretKeyRef: { name: hub-secrets, key: OAUTH2_PROXY_COOKIE_SECRET } }
+          ports:
+            - name: http
+              containerPort: 4180
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth2-proxy
+spec:
+  selector:
+    app: oauth2-proxy
+  ports:
+    - name: http
+      port: 4180
+      targetPort: http
