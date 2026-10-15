@@ -135,7 +135,7 @@ alrededor de 1 GB de RAM (Keycloak, unos 600 MB).
 ### 2. Configuración
 
 ```bash
-git clone <este repositorio> hub && cd hub
+git clone --branch 1.0.0 https://github.com/ElPostilla/compra-hub-selfhosted.git hub && cd hub
 sh scripts/generar-secretos.sh     # crea .env desde .env.example y rellena contraseñas y claves
 ```
 
@@ -147,6 +147,11 @@ Abre `.env` y revisa al menos:
 | `ACME_EMAIL` | Tu email para Let's Encrypt (opcional, recomendado) |
 | `VAPID_SUBJECT` | `mailto:` con tu email (lo exige el estándar de avisos push) |
 | `OLLAMA_URL`, `OLLAMA_MODEL` | Dónde está tu Ollama, si quieres asistente (ver [Asistente y MCP](#asistente-y-mcp)) |
+
+`--branch 1.0.0` fija la última versión publicada (ver
+[releases](https://github.com/ElPostilla/compra-hub-selfhosted/releases) y
+[CHANGELOG.md](CHANGELOG.md)); sin él tendrás `main`, que puede estar a
+medias.
 
 `generar-secretos.sh` solo rellena lo que esté vacío: se puede volver a
 ejecutar sin miedo. `.env` está en `.gitignore`; no lo subas a ningún sitio.

@@ -136,7 +136,7 @@ uses around 1 GB of RAM (Keycloak about 600 MB).
 ### 2. Configuration
 
 ```bash
-git clone <this repository> hub && cd hub
+git clone --branch 1.0.0 https://github.com/ElPostilla/compra-hub-selfhosted.git hub && cd hub
 sh scripts/generar-secretos.sh     # creates .env from .env.example and fills in passwords and keys
 ```
 
@@ -148,6 +148,11 @@ Open `.env` and check at least:
 | `ACME_EMAIL` | Your email for Let's Encrypt (optional, recommended) |
 | `VAPID_SUBJECT` | `mailto:` with your email (required by the web push standard) |
 | `OLLAMA_URL`, `OLLAMA_MODEL` | Where your Ollama is, if you want the assistant (see [Assistant and MCP](#assistant-and-mcp)) |
+
+`--branch 1.0.0` pins the latest published version (see
+[releases](https://github.com/ElPostilla/compra-hub-selfhosted/releases) and
+[CHANGELOG.md](CHANGELOG.md)); without it you get `main`, which may be
+work in progress.
 
 `generar-secretos.sh` only fills in empty values, so it's safe to run it
 again. `.env` is in `.gitignore`; don't upload it anywhere.
