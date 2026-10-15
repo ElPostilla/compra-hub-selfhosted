@@ -1,0 +1,61 @@
+# Comprobaciones de cada pull request y de main: tests de las APIs, que
+# compilen las 15 imagenes y que los despliegues (Compose y kustomize) sean
+# validos. No usa secretos ni sube nada a ningun registro.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests (${{ matrix.service }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        service: [hub-mcp, asistente-api, lista-compra-api, calendario-api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+        working-directory: ${{ matrix.service }}
+      - run: npm test
+        working-directory: ${{ matrix.service }}
+
+  images:
+    name: Imagen (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [inicio, lista-compra, todo, calendario, gastos, menu, perfil, grupos,
+              lista-compra-api, todo-api, calendario-api, gastos-api, menu-api, asistente-api, hub-mcp]
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh scripts/build-images.sh ${{ matrix.app }}
+
+  deploy-config:
+    name: Despliegue (Compose y Kubernetes)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: docker compose config
+        run: |
+          sh scripts/generar-secretos.sh
+          docker compose config -q
+          HUB_MCP_PUBLIC=true docker compose config -q
+      - name: kubectl kustomize
+        run: |
+          cp deploy/k8s/secrets.env.example deploy/k8s/secrets.env
+          kubectl kustomize deploy/ > /dev/null

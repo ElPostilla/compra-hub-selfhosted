@@ -24,6 +24,7 @@ de sesión con Keycloak y el asistente con su servidor MCP.
 - [Opcionales: avisos push, Google Calendar, precios, páginas legales](#opcionales)
 - [Copias de seguridad y actualizaciones](#copias-de-seguridad-y-actualizaciones)
 - [Solución de problemas](#solución-de-problemas)
+- [Contribuir](#contribuir)
 - [Licencia](#licencia)
 
 ---
@@ -557,6 +558,14 @@ Las APIs crean y migran sus tablas solas al arrancar.
 | Asistente «no disponible» | La API no llega a `OLLAMA_URL` o el modelo no está descargado (`ollama list`) |
 | No aparece «Activar avisos» | Faltan las claves VAPID o el certificado no es válido |
 | Cambiaste contraseñas en `.env` y Postgres no arranca bien | Las bases solo se crean con el volumen vacío: cambia la contraseña también dentro (`ALTER USER ... PASSWORD ...`) |
+
+## Contribuir
+
+Las contribuciones son bienvenidas por pull request: lee
+[CONTRIBUTING.md](CONTRIBUTING.md) antes (incluye la cesión de derechos
+de las contribuciones). Los fallos de seguridad se reportan en privado
+([SECURITY.md](SECURITY.md)). El proyecto lo mantiene y decide
+[@ElPostilla](https://github.com/ElPostilla).
 
 ## Licencia
 

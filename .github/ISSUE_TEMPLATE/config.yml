@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vulnerabilidad de seguridad / Security vulnerability
+    url: https://github.com/ElPostilla/compra-hub-selfhosted/security/advisories/new
+    about: No abras un issue público; repórtala en privado. / Don't open a public issue; report it privately.

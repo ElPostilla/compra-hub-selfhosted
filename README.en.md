@@ -26,6 +26,7 @@ its MCP server.
 - [Optional: push notifications, Google Calendar, prices, legal pages](#optional)
 - [Backups and updates](#backups-and-updates)
 - [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
 - [License](#license)
 
 ---
@@ -566,6 +567,14 @@ The APIs create and migrate their tables on their own at startup.
 | Assistant "not available" | The API can't reach `OLLAMA_URL` or the model isn't downloaded (`ollama list`) |
 | «Activar avisos» (enable notifications) doesn't show up | VAPID keys missing or invalid certificate |
 | You changed passwords in `.env` and Postgres misbehaves | Databases are only created with an empty volume: change the password inside too (`ALTER USER ... PASSWORD ...`) |
+
+## Contributing
+
+Contributions are welcome via pull request: read
+[CONTRIBUTING.md](CONTRIBUTING.md) first (it includes the contribution
+license grant). Security issues are reported privately
+([SECURITY.md](SECURITY.md)). The project is maintained and decided by
+[@ElPostilla](https://github.com/ElPostilla).
 
 ## License
 

@@ -1,0 +1,22 @@
+name: Idea o mejora / Feature request
+description: Propón algo nuevo. / Suggest something new.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qué problema resuelve / What problem does it solve
+    validations:
+      required: true
+  - type: textarea
+    id: propuesta
+    attributes:
+      label: Propuesta / Proposal
+    validations:
+      required: true
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Colaboración / Contribution
+      options:
+        - label: Me gustaría hacerlo yo (espera a que el mantenedor lo apruebe antes de empezar). / I'd like to implement it (wait for the maintainer's go-ahead first).

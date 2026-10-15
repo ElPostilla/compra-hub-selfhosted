@@ -1,0 +1,40 @@
+name: Error / Bug
+description: Algo no funciona como debería. / Something doesn't work as it should.
+labels: [bug]
+body:
+  - type: textarea
+    id: que-pasa
+    attributes:
+      label: Qué pasa / What happens
+      description: Qué esperabas y qué ha pasado. / What you expected and what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: pasos
+    attributes:
+      label: Pasos para reproducirlo / Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: despliegue
+    attributes:
+      label: Despliegue / Deployment
+      options:
+        - Docker Compose
+        - Kubernetes
+        - Otro / Other
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versión (commit o etiqueta) / Version (commit or tag)
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "p.ej. `docker compose logs <servicio>`. **Quita tokens, contraseñas y dominios.** / Remove tokens, passwords and domains."
+      render: text
